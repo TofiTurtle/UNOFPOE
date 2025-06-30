@@ -5,6 +5,9 @@ import javafx.stage.Stage;
 import org.example.eiscuno.view.GameUnoStage;
 
 import java.io.IOException;
+//Comentario generico...
+
+
 
 /**
  * The main class of the EISC Uno application.
