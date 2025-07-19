@@ -81,7 +81,11 @@ public class GameUnoController {
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 // Aqui deberian verificar si pueden en la tabla jugar esa carta
-                if (table.getCardsTable().isEmpty()) {
+
+                /*
+                Aqui digo que si la mesa esta vacia o que si la carta en la mesa es de color negro pues que ponga lo que quiera
+                 */
+                if (table.getCardsTable().isEmpty() || table.getCurrentCardOnTheTable().getColor().equals("BLACK")) {
                     System.out.println("entro 1");
                     System.out.println(card.getValue());
                     System.out.println(card.getColor());
@@ -91,12 +95,18 @@ public class GameUnoController {
                     threadPlayMachine.setHasPlayerPlayed(true);
                     printCardsHumanPlayer();
                 }
+                // Esto es solo para verificar que carta puede estar fallando por ahi, esto se quitaria
                 else if(card.getColor() == null) {
                     System.out.println("Esta entrando como null");
                     System.out.println(card.getValue());
                     System.out.println(card.getColor());
                 }
-                else if(table.getCurrentCardOnTheTable().getColor().equals(card.getColor())  || table.getCurrentCardOnTheTable().getValue().equals(card.getValue()) ) {
+                /*
+                Aqui se dice que si el color de la carta en la mesa es igual a la carta que se quiere poner
+                o que si el valor de la carta en la mesa es igual al valor de la carta que se quiere poner pues que lo deje
+                o la otra es que si la carta que se quiere poner es de color negro pues que lo deje
+                 */
+                else if(table.getCurrentCardOnTheTable().getColor().equals(card.getColor())  || table.getCurrentCardOnTheTable().getValue().equals(card.getValue()) || card.getColor().equals("BLACK")) {
                     System.out.println("entro 2");
                     System.out.println(card.getValue());
                     System.out.println(card.getColor());
