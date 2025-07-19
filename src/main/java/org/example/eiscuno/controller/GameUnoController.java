@@ -13,6 +13,8 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
+import java.util.Objects;
+
 /**
  * Controller class for the Uno game.
  */
@@ -79,11 +81,29 @@ public class GameUnoController {
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 // Aqui deberian verificar si pueden en la tabla jugar esa carta
-                gameUno.playCard(card);
-                tableImageView.setImage(card.getImage());
-                humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                threadPlayMachine.setHasPlayerPlayed(true);
-                printCardsHumanPlayer();
+                if (table.getCardsTable().isEmpty()) {
+                    System.out.println("entro 1");
+                    gameUno.playCard(card);
+                    tableImageView.setImage(card.getImage());
+                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    threadPlayMachine.setHasPlayerPlayed(true);
+                    printCardsHumanPlayer();
+                }
+                else if(card.getColor() == null) {
+                    System.out.println("Esta entrando como null");
+                }
+                else if(table.getCurrentCardOnTheTable().getColor().equals(card.getColor())  || table.getCurrentCardOnTheTable().getValue().equals(card.getValue())) {
+                    System.out.println("entro 2");
+                    gameUno.playCard(card);
+                    tableImageView.setImage(card.getImage());
+                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    threadPlayMachine.setHasPlayerPlayed(true);
+                    printCardsHumanPlayer();
+                }
+
+                System.out.println("afuera");
+
+
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -138,7 +158,11 @@ public class GameUnoController {
      */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
-        // Implement logic to take a card here
+        /*
+         Ahora el jugador llama a su metodo de agregar una carta
+          y a su vez llama a la baraja para que le muestra la carta del peek y la quite
+         */
+        humanPlayer.addCard(deck.takeCard());
     }
 
     /**

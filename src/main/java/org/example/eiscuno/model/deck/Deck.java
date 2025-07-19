@@ -92,6 +92,7 @@ public class Deck {
         if (deckOfCards.isEmpty()) {
             throw new IllegalStateException("No hay más cartas en el mazo.");
         }
+        System.out.println("Cogio una carta");
         return deckOfCards.pop();
     }
 
