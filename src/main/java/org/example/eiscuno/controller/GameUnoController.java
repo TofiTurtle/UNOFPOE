@@ -83,6 +83,8 @@ public class GameUnoController {
                 // Aqui deberian verificar si pueden en la tabla jugar esa carta
                 if (table.getCardsTable().isEmpty()) {
                     System.out.println("entro 1");
+                    System.out.println(card.getValue());
+                    System.out.println(card.getColor());
                     gameUno.playCard(card);
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
@@ -91,9 +93,13 @@ public class GameUnoController {
                 }
                 else if(card.getColor() == null) {
                     System.out.println("Esta entrando como null");
+                    System.out.println(card.getValue());
+                    System.out.println(card.getColor());
                 }
-                else if(table.getCurrentCardOnTheTable().getColor().equals(card.getColor())  || table.getCurrentCardOnTheTable().getValue().equals(card.getValue())) {
+                else if(table.getCurrentCardOnTheTable().getColor().equals(card.getColor())  || table.getCurrentCardOnTheTable().getValue().equals(card.getValue()) ) {
                     System.out.println("entro 2");
+                    System.out.println(card.getValue());
+                    System.out.println(card.getColor());
                     gameUno.playCard(card);
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
@@ -163,6 +169,7 @@ public class GameUnoController {
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
         humanPlayer.addCard(deck.takeCard());
+        printCardsHumanPlayer();
     }
 
     /**
