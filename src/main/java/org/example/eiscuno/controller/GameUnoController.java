@@ -80,46 +80,16 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                // Aqui deberian verificar si pueden en la tabla jugar esa carta
-
-                /*
-                Aqui digo que si la mesa esta vacia o que si la carta en la mesa es de color negro pues que ponga lo que quiera
-                 */
-                if (table.getCardsTable().isEmpty() || table.getCurrentCardOnTheTable().getColor().equals("BLACK")) {
-                    System.out.println("entro 1");
+                if(table.isValidPlay(card)) {
+                    System.out.println("entro");
                     System.out.println(card.getValue());
                     System.out.println(card.getColor());
-                    gameUno.playCard(card);
+                    // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     threadPlayMachine.setHasPlayerPlayed(true);
                     printCardsHumanPlayer();
                 }
-                // Esto es solo para verificar que carta puede estar fallando por ahi, esto se quitaria
-                else if(card.getColor() == null) {
-                    System.out.println("Esta entrando como null");
-                    System.out.println(card.getValue());
-                    System.out.println(card.getColor());
-                }
-                /*
-                Aqui se dice que si el color de la carta en la mesa es igual a la carta que se quiere poner
-                o que si el valor de la carta en la mesa es igual al valor de la carta que se quiere poner pues que lo deje
-                o la otra es que si la carta que se quiere poner es de color negro pues que lo deje
-                 */
-                else if(table.getCurrentCardOnTheTable().getColor().equals(card.getColor())  || table.getCurrentCardOnTheTable().getValue().equals(card.getValue()) || card.getColor().equals("BLACK")) {
-                    System.out.println("entro 2");
-                    System.out.println(card.getValue());
-                    System.out.println(card.getColor());
-                    gameUno.playCard(card);
-                    tableImageView.setImage(card.getImage());
-                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                    threadPlayMachine.setHasPlayerPlayed(true);
-                    printCardsHumanPlayer();
-                }
-
-                System.out.println("afuera");
-
-
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
