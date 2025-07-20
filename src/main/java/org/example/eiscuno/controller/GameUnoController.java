@@ -24,7 +24,7 @@ public class GameUnoController {
     private GridPane gridPaneCardsMachine;
 
     @FXML
-    private GridPane gridPaneCardsPlayer;
+    public GridPane gridPaneCardsPlayer;
 
     @FXML
     private ImageView tableImageView;
@@ -33,7 +33,7 @@ public class GameUnoController {
     private Player machinePlayer;
     private Deck deck;
     private Table table;
-    private GameUno gameUno;
+    public GameUno gameUno;
     private int posInitCardToShow;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
@@ -52,7 +52,7 @@ public class GameUnoController {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
     }
 
@@ -80,10 +80,7 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                if(table.isValidPlay(card)) {
-                    System.out.println("entro");
-                    System.out.println(card.getValue());
-                    System.out.println(card.getColor());
+                if(table.isValidPlay(card) ) {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
@@ -161,4 +158,10 @@ public class GameUnoController {
     void onHandleUno(ActionEvent event) {
         // Implement logic to handle Uno event here
     }
+
+    public int getPosInitCardToShow() {
+        return posInitCardToShow;
+    }
+
+
 }
