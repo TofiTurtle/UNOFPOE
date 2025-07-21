@@ -3,6 +3,7 @@ package org.example.eiscuno;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.example.eiscuno.view.GameUnoStage;
+import org.example.eiscuno.view.StartUnoView;
 
 import java.io.IOException;
 //Comentario generico...
@@ -31,6 +32,6 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        GameUnoStage.getInstance();
+        StartUnoView.getInstance();
     }
 }

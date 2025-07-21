@@ -25,7 +25,7 @@ public class GameUnoStage extends Stage {
             root = loader.load();
         } catch (IOException e) {
             // Re-throwing the caught IOException
-            throw new IOException("Error while loading FXML file", e);
+            throw new IOException("Error al cargar el archvio FXML", e);
         }
         Scene scene = new Scene(root);
         // Configuring the stage

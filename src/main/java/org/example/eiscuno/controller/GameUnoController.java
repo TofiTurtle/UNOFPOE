@@ -13,6 +13,8 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
+import java.util.Objects;
+
 /**
  * Controller class for the Uno game.
  */
@@ -22,7 +24,7 @@ public class GameUnoController {
     private GridPane gridPaneCardsMachine;
 
     @FXML
-    private GridPane gridPaneCardsPlayer;
+    public GridPane gridPaneCardsPlayer;
 
     @FXML
     private ImageView tableImageView;
@@ -31,7 +33,7 @@ public class GameUnoController {
     private Player machinePlayer;
     private Deck deck;
     private Table table;
-    private GameUno gameUno;
+    public GameUno gameUno;
     private int posInitCardToShow;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
@@ -50,7 +52,7 @@ public class GameUnoController {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
     }
 
@@ -78,12 +80,13 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                // Aqui deberian verificar si pueden en la tabla jugar esa carta
-                gameUno.playCard(card);
-                tableImageView.setImage(card.getImage());
-                humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                threadPlayMachine.setHasPlayerPlayed(true);
-                printCardsHumanPlayer();
+                if(table.isValidPlay(card) ) {
+                    // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
+                    tableImageView.setImage(card.getImage());
+                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    threadPlayMachine.setHasPlayerPlayed(true);
+                    printCardsHumanPlayer();
+                }
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -138,7 +141,12 @@ public class GameUnoController {
      */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
-        // Implement logic to take a card here
+        /*
+         Ahora el jugador llama a su metodo de agregar una carta
+          y a su vez llama a la baraja para que le muestra la carta del peek y la quite
+         */
+        humanPlayer.addCard(deck.takeCard());
+        printCardsHumanPlayer();
     }
 
     /**
@@ -150,4 +158,10 @@ public class GameUnoController {
     void onHandleUno(ActionEvent event) {
         // Implement logic to handle Uno event here
     }
+
+    public int getPosInitCardToShow() {
+        return posInitCardToShow;
+    }
+
+
 }

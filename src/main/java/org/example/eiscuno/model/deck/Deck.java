@@ -35,6 +35,9 @@ public class Deck {
                     cardEnum.name().equals("FOUR_WILD_DRAW") ||
                     cardEnum.name().equals("WILD")) {
                 Card card = new Card(cardEnum.getFilePath(), getCardValue(cardEnum.name()), getCardColor(cardEnum.name()));
+                System.out.println("Deck" + card.getColor());
+                System.out.println("Deck" + card.getValue());
+                System.out.println("Deck" + card.getCard());
                 deckOfCards.push(card);
             }
         }
@@ -60,8 +63,18 @@ public class Deck {
             return "7";
         } else if (name.endsWith("8")){
             return "8";
-        } else if (name.endsWith("9")){
+        } else if (name.endsWith("9")) {
             return "9";
+        } else if (name.startsWith("SKIP")) {
+            return "SKIP";
+        } else if (name.startsWith("WILD")) {
+            return "WILD";
+        } else if (name.startsWith("TWO_WILD")) {
+            return "TWO_WILD";
+        } else if (name.startsWith("FOUR_WILD")) {
+            return "FOUR_WILD";
+        } else if (name.startsWith("RESERVE")) {
+            return "RESERVE";
         } else {
             return null;
         }
@@ -77,6 +90,18 @@ public class Deck {
             return "BLUE";
         } else if(name.startsWith("RED")){
             return "RED";
+        } else if (name.endsWith("GREEN")) {
+            return "GREEN";
+        } else if(name.endsWith("YELLOW")){
+            return "YELLOW";
+        } else if(name.endsWith("BLUE")){
+            return "BLUE";
+        } else if(name.endsWith("RED")){
+            return "RED";
+        } else if(name.endsWith("DRAW")) {
+            return "BLACK";
+        } else if (name.startsWith("WILD")) {
+            return "BLACK";
         } else {
             return null;
         }
@@ -92,6 +117,7 @@ public class Deck {
         if (deckOfCards.isEmpty()) {
             throw new IllegalStateException("No hay más cartas en el mazo.");
         }
+        System.out.println("Cogio una carta");
         return deckOfCards.pop();
     }
 
