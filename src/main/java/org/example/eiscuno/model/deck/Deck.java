@@ -117,8 +117,9 @@ public class Deck {
         if (deckOfCards.isEmpty()) {
             throw new IllegalStateException("No hay más cartas en el mazo.");
         }
-        System.out.println("Cogio una carta");
-        return deckOfCards.pop();
+        Card auxCard = deckOfCards.pop(); //var temporal auxiliar para ver QUE carta agarra
+        System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
+        return auxCard;
     }
 
     /**

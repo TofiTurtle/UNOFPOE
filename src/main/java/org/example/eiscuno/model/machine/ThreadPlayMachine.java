@@ -63,9 +63,12 @@ public class ThreadPlayMachine extends Thread {
         //Aqui se crea una copia de las cartas en la baraja actual
         ArrayList<Card> temporaryDeck = new ArrayList<>(machinePlayer.getCardsPlayer());
         //Para verificar
+        System.out.println("----------------------------------------------\n" +
+                           "       Mazo Maquina Antes de Lanzar: ");
         for(int i = 0; i < temporaryDeck.size(); i++) {
-            System.out.print( temporaryDeck.get(i).getColor() + " : " + temporaryDeck.get(i).getValue() + "  ,,,, ");
+            System.out.print( temporaryDeck.get(i).getColor() + ": " + temporaryDeck.get(i).getValue() + "\n");
         }
+        System.out.println("----------------------------------------------\n");
 
         int index = (int) (Math.random() * temporaryDeck.size());
         Card selectedCard;
@@ -92,17 +95,17 @@ public class ThreadPlayMachine extends Thread {
             System.out.println("lo intenta");
         } while(!table.isValidPlay(selectedCard));
 
-        // Verificar que si se esten borrando correctamente
-        for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            System.out.print( machinePlayer.getCard(i).getColor() + " : " + machinePlayer.getCard(i).getValue() + "  ,,,, ");
-        }
-        System.out.println();
         machinePlayer.getCardsPlayer().remove(selectedCard);
         tableImageView.setImage(selectedCard.getImage());
 
+        // Verificar que si se esten borrando correctamente
+        System.out.println("\n----------------------------------------------\n" +
+                           "       Mazo Maquina DESPUES de Lanzar: ");
         for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            System.out.print( machinePlayer.getCard(i).getColor() + " : " + machinePlayer.getCard(i).getValue() + "  ,,,, ");
+            System.out.print( machinePlayer.getCard(i).getColor() + ": " + machinePlayer.getCard(i).getValue() + "\n");
         }
+        System.out.println("-------------------------------------------------------\n\n");
+
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {
