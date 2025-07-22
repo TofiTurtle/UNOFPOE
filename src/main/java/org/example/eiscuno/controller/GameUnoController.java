@@ -84,6 +84,14 @@ public class GameUnoController {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    /*
+                    hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
+                    setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
+                     */
+                    if(card.isWild()) {
+                        handleWildCard(card);
+                    }
+
                     threadPlayMachine.setHasPlayerPlayed(true);
                     printCardsHumanPlayer();
                 }
@@ -161,6 +169,39 @@ public class GameUnoController {
 
     public int getPosInitCardToShow() {
         return posInitCardToShow;
+    }
+
+
+    //este sera el metodo encargado de manejar los diferentes casos comodin, tambien debe recibir el jugador sobre el que tendra efecto
+    public void handleWildCard(Card card) {
+        String valueCard = card.getValue();
+
+        switch (valueCard) {
+            case "SKIP":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                break;
+
+            case "WILD":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                break;
+
+            case "TWO_WILD":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                break;
+
+            case "FOUR_WILD":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                break;
+
+            case "RESERVE":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                break;
+
+            default:
+                System.out.println("Caso no manejado aún, nombre carta: " + valueCard);
+
+
+        }
     }
 
 

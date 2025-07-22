@@ -41,7 +41,13 @@ public class ThreadPlayMachine extends Thread {
                     e.printStackTrace();
                 }
 
-                putCardOnTheTable();
+                // ahora obtenemos la carta que se jugo
+                Card cardPlayed = putCardOnTheTable();
+
+                if(cardPlayed.isWild()) {
+                    //aqui va la logica de que hacer si la carta es comodin, obtenemos su values para saber que tipo de comodin es
+                    gameUnoController.handleWildCard(cardPlayed);
+                }
                 hasPlayerPlayed = false;
 
                 //aqui volvemos a habilitar el mazo de el jugador
@@ -52,7 +58,8 @@ public class ThreadPlayMachine extends Thread {
         }
     }
 
-    private void putCardOnTheTable(){
+    // este metodo ahora retorna la carta que se jugo, para despues hacer comprobaciones de si es comodin o que
+    private Card putCardOnTheTable(){
         /*
         La idea seria coger en una estructura de datos y poner las cartas actuales de la maquina, entonces en el
         do while que escoja aleatoriamente y si no funciona la quite de esta estructura de datos, mas no de su mazo
@@ -92,17 +99,22 @@ public class ThreadPlayMachine extends Thread {
             System.out.println("lo intenta");
         } while(!table.isValidPlay(selectedCard));
 
-        // Verificar que si se esten borrando correctamente
+        // Verificar que si se esten borrando correctamente, esto se puede borrar despues
         for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
             System.out.print( machinePlayer.getCard(i).getColor() + " : " + machinePlayer.getCard(i).getValue() + "  ,,,, ");
         }
         System.out.println();
+
+        // esto no, esta es la logica de borrar
         machinePlayer.getCardsPlayer().remove(selectedCard);
         tableImageView.setImage(selectedCard.getImage());
 
+        // esto tambien se puede borrar, solo es para verficar
         for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
             System.out.print( machinePlayer.getCard(i).getColor() + " : " + machinePlayer.getCard(i).getValue() + "  ,,,, ");
         }
+
+        return selectedCard;
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {
