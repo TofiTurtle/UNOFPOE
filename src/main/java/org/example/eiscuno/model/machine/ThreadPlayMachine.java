@@ -45,10 +45,15 @@ public class ThreadPlayMachine extends Thread {
                 Card cardPlayed = putCardOnTheTable();
 
                 if(cardPlayed.isWild()) {
-                    //aqui va la logica de que hacer si la carta es comodin, obtenemos su values para saber que tipo de comodin es
-                    gameUnoController.handleWildCard(cardPlayed);
+                    String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
+                    if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                        hasPlayerPlayed = false;
+                    }
                 }
-                hasPlayerPlayed = false;
+                else {
+                    hasPlayerPlayed = false;
+                }
+
 
                 //aqui volvemos a habilitar el mazo de el jugador
                 Platform.runLater(() -> {

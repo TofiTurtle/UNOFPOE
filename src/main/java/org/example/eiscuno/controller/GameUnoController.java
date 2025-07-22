@@ -89,10 +89,17 @@ public class GameUnoController {
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
                      */
                     if(card.isWild()) {
-                        handleWildCard(card);
+                        //aqui guardo el resultado de la funcion que maneja los comodines
+                        String wildEffect = handleWildCard(card, machinePlayer);
+                        //si el resultado no es ninguna carta que se salte el turno de la maquina pues entonces le doy el turno a la maquina
+                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                            threadPlayMachine.setHasPlayerPlayed(true);
+                        }
+                    }
+                    else {
+                        threadPlayMachine.setHasPlayerPlayed(true);
                     }
 
-                    threadPlayMachine.setHasPlayerPlayed(true);
                     printCardsHumanPlayer();
                 }
             });
@@ -173,36 +180,51 @@ public class GameUnoController {
 
 
     //este sera el metodo encargado de manejar los diferentes casos comodin, tambien debe recibir el jugador sobre el que tendra efecto
-    public void handleWildCard(Card card) {
+    /*
+    Este metodo es el encargado de manejar los diferentes casos comodin
+    Recibe el jugador objtivo, o sea sobre el que van a sugur efecto las cartas de +2,+4,...
+    Para manejar los casos donde se quita el turno de el otro jugador
+     */
+    public String handleWildCard(Card card, Player targetPlayer) {
         String valueCard = card.getValue();
+        Card auxCard;
 
         switch (valueCard) {
             case "SKIP":
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
-                break;
+                return "SKIP";
 
             case "WILD":
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
-                break;
+                return "WILD";
 
             case "TWO_WILD":
+                for (int i = 0; i < 2; i++) {
+                    auxCard = deck.takeCard();
+                    targetPlayer.addCard(auxCard);
+                }
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
-                break;
+                return "TWO_WILD";
 
             case "FOUR_WILD":
+                for (int i = 0; i < 4; i++) {
+                    auxCard = deck.takeCard();
+                    targetPlayer.addCard(auxCard);
+                }
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
-                break;
+                return "FOUR_WILD";
 
             case "RESERVE":
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
-                break;
+                return "RESERVE";
 
             default:
-                System.out.println("Caso no manejado aún, nombre carta: " + valueCard);
-
-
+                return ("Caso no manejado aún, nombre carta: " + valueCard);
         }
     }
 
+    public Player getHumanPlayer() {
+        return humanPlayer;
+    }
 
 }
