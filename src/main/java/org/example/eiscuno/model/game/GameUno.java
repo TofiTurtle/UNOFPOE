@@ -37,6 +37,8 @@ public class GameUno implements IGameUno {
      */
     @Override
     public void startGame() {
+        System.out.println("-----------------------------\n" +
+                           "   CARTAS DEL JUGADOR/MAQUINA: ");
         for (int i = 0; i < 10; i++) {
             if (i < 5) {
                 humanPlayer.addCard(this.deck.takeCard());

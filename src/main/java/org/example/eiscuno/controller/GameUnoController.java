@@ -79,13 +79,27 @@ public class GameUnoController {
             Card card = currentVisibleCardsHumanPlayer[i];
             ImageView cardImageView = card.getCard();
 
+            /*
+            * Aqui es donde Player Juega una carta
+            * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if(table.isValidPlay(card) ) {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //pequeña logica para el +2
+                    if(card.getValue().equals("TWO_WILD")) {
+                        gameUno.eatCard(machinePlayer, 2);
+                        //machinePlayer.addCard(this.deck.takeCard());
+                        //machinePlayer.addCard(this.deck.takeCard());
+                    }
+
+
                     threadPlayMachine.setHasPlayerPlayed(true);
                     printCardsHumanPlayer();
+
+
+
                 }
             });
 
