@@ -58,6 +58,7 @@ public class GameUno implements IGameUno {
     public void eatCard(Player player, int numberOfCards) {
         for (int i = 0; i < numberOfCards; i++) {
             player.addCard(this.deck.takeCard());
+            System.out.println("***card eated***");
         }
     }
 

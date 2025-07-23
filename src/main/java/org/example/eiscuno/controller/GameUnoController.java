@@ -96,6 +96,7 @@ public class GameUnoController {
 
 
                     threadPlayMachine.setHasPlayerPlayed(true);
+
                     printCardsHumanPlayer();
 
 
@@ -176,6 +177,11 @@ public class GameUnoController {
     public int getPosInitCardToShow() {
         return posInitCardToShow;
     }
-
-
+    //Getter para los Players
+    public Player getMachinePlayer() {
+        return machinePlayer;
+    }
+    public Player getHumanPlayer() {
+        return humanPlayer;
+    }
 }

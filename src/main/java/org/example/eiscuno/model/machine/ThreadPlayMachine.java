@@ -98,6 +98,11 @@ public class ThreadPlayMachine extends Thread {
         machinePlayer.getCardsPlayer().remove(selectedCard);
         tableImageView.setImage(selectedCard.getImage());
 
+        //Logica Para cartas EAT**
+        if (selectedCard.getValue().equals("TWO_WILD")) {
+            gameUnoController.gameUno.eatCard(gameUnoController.getHumanPlayer(), 2);
+        }
+
         // Verificar que si se esten borrando correctamente
         System.out.println("\n----------------------------------------------\n" +
                            "       Mazo Maquina DESPUES de Lanzar: ");
