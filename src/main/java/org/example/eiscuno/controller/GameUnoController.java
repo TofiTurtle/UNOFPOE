@@ -45,6 +45,9 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+        Card firstCard = deck.takeCard();
+        table.addCardOnTheTable(firstCard);
+        tableImageView.setImage(firstCard.getImage());
         this.gameUno.startGame();
         printCardsHumanPlayer();
 
@@ -66,6 +69,7 @@ public class GameUnoController {
         this.table = new Table();
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
+
     }
 
     /**
