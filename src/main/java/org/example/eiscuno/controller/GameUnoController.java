@@ -2,6 +2,7 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -12,6 +13,7 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import org.example.eiscuno.view.GameUnoStage;
 
 import java.util.Objects;
 
@@ -29,13 +31,22 @@ public class GameUnoController {
     @FXML
     private ImageView tableImageView;
 
+    @FXML
+    public Button buttonDeck;
+
+    @FXML
+    private Button buttonExit;
+
+    @FXML
+    private Button buttonUNO;
+
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
     private Table table;
     public GameUno gameUno;
     private int posInitCardToShow;
-
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
 
@@ -87,6 +98,7 @@ public class GameUnoController {
                 if(table.isValidPlay(card) ) {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
+                    buttonDeck.setDisable(true);
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
@@ -165,6 +177,7 @@ public class GameUnoController {
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
         humanPlayer.addCard(deck.takeCard());
+        buttonDeck.setDisable(true);
         threadPlayMachine.setHasPlayerPlayed(true);
         printCardsHumanPlayer();
     }
@@ -230,6 +243,11 @@ public class GameUnoController {
 
     public Player getHumanPlayer() {
         return humanPlayer;
+    }
+
+    @FXML
+    void onHandleExit(ActionEvent event) {
+        GameUnoStage.deleteInstance();
     }
 
 }

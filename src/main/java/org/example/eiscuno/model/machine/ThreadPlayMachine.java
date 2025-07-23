@@ -53,10 +53,12 @@ public class ThreadPlayMachine extends Thread {
                     if(cardPlayed.isWild()) {
                         String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
                         if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                            gameUnoController.buttonDeck.setDisable(false);
                             hasPlayerPlayed = false;
                         }
                     }
                     else {
+                        gameUnoController.buttonDeck.setDisable(false);
                         hasPlayerPlayed = false;
                     }
                 }
@@ -107,6 +109,8 @@ public class ThreadPlayMachine extends Thread {
      */
     private void handleTakeCard() {
         machinePlayer.addCard(deck.takeCard());
+        //activar el boton para que el jugador pueda arrastrar
+        gameUnoController.buttonDeck.setDisable(false);
         setHasPlayerPlayed(false);
     }
 
