@@ -41,8 +41,27 @@ public class ThreadPlayMachine extends Thread {
                     e.printStackTrace();
                 }
 
-                putCardOnTheTable();
-                hasPlayerPlayed = false;
+                // ahora obtenemos la carta que se jugo, esto tambien peude ser null
+                Card cardPlayed = putCardOnTheTable();
+
+                //si es null entonces arrastramos
+                if (cardPlayed == null) {
+                    handleTakeCard();
+                }
+                else {
+                    //hacemos las comprobaciones de si es una carta comodin
+                    if(cardPlayed.isWild()) {
+                        String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
+                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                            gameUnoController.buttonDeck.setDisable(false);
+                            hasPlayerPlayed = false;
+                        }
+                    }
+                    else {
+                        gameUnoController.buttonDeck.setDisable(false);
+                        hasPlayerPlayed = false;
+                    }
+                }
 
                 //aqui volvemos a habilitar el mazo de el jugador
                 Platform.runLater(() -> {
@@ -52,65 +71,58 @@ public class ThreadPlayMachine extends Thread {
         }
     }
 
-    private void putCardOnTheTable(){
-        /*
-        La idea seria coger en una estructura de datos y poner las cartas actuales de la maquina, entonces en el
-        do while que escoja aleatoriamente y si no funciona la quite de esta estructura de datos, mas no de su mazo
-        y entonces si este mazo se queda vacio pues ahi si empezar a coger de la baraja de a una carta y ir probando hasta
-        que una funcione
-         */
-
-        //Aqui se crea una copia de las cartas en la baraja actual
-        ArrayList<Card> temporaryDeck = new ArrayList<>(machinePlayer.getCardsPlayer());
+    // este metodo devuelve la carta que se jugo o null en el caso de que no tuviera carta valida para jugar
+    private Card putCardOnTheTable(){
+        
+        //se crea una copia de el mazo actual de la maquina para iterar sobre esta
+        ArrayList<Card> machineDeck = new ArrayList<>(machinePlayer.getCardsPlayer());
         //Para verificar
         System.out.println("----------------------------------------------\n" +
                            "       Mazo Maquina Antes de Lanzar: ");
-        for(int i = 0; i < temporaryDeck.size(); i++) {
-            System.out.print( temporaryDeck.get(i).getColor() + ": " + temporaryDeck.get(i).getValue() + "\n");
+        for(int i = 0; i < machineDeck.size(); i++) {
+            System.out.print( machineDeck.get(i).getColor() + ": " + machineDeck.get(i).getValue() + "\n");
         }
         System.out.println("----------------------------------------------\n");
 
-        int index = (int) (Math.random() * temporaryDeck.size());
+        int index = (int) (Math.random() * machineDeck.size());
+
         Card selectedCard;
 
-        do {
-            /*
-            En este punto la maquina hace random para coger aleatoriamente sus cartas hasta que sea valido ponerlas
-            Aqui hay un problema y esque si no tiene ninguna valida esto es infinito, entonces para esto hay que usar la baraja, pero despues
-            de probar con todas sus cartas
-             */
-
-            /*
-            Si el temporarydeck esta vacio es porque ya usamos todas las cartas y ninguna funciono
-             */
-            if (temporaryDeck.isEmpty()) {
-                selectedCard = deck.takeCard();
-                machinePlayer.addCard(selectedCard);
-            } else {
-                index = (int) (Math.random() * temporaryDeck.size());
-                selectedCard = temporaryDeck.get(index);
-                temporaryDeck.remove(index);
-            }
-
-            System.out.println("lo intenta");
-        } while(!table.isValidPlay(selectedCard));
-
-        machinePlayer.getCardsPlayer().remove(selectedCard);
-        tableImageView.setImage(selectedCard.getImage());
-
-        //Logica Para cartas EAT**
-        if (selectedCard.getValue().equals("TWO_WILD")) {
-            gameUnoController.gameUno.eatCard(gameUnoController.getHumanPlayer(), 2);
-        }
-
-        // Verificar que si se esten borrando correctamente
-        System.out.println("\n----------------------------------------------\n" +
-                           "       Mazo Maquina DESPUES de Lanzar: ");
+        
+        //Para verificar comportamiento
         for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            System.out.print( machinePlayer.getCard(i).getColor() + ": " + machinePlayer.getCard(i).getValue() + "\n");
+            System.out.print( machinePlayer.getCardsPlayer().get(i).getColor() + " : " + machinePlayer.getCardsPlayer().get(i).getValue() + "  ,,,, ");
         }
-        System.out.println("-------------------------------------------------------\n\n");
+        System.out.println();
 
+        //iteramos sobre el mazo de la maquina uno por uno comprobando  que se pueda lanzar una carta
+        for(int i = 0; i < machineDeck.size(); i++) {
+            selectedCard = machineDeck.get(i);
+            if(table.isValidPlay(selectedCard)) {
+                //si la carta fue valida entonces la borro de el mazo original de la maquina y la seteo en la mesa
+                machinePlayer.getCardsPlayer().remove(selectedCard);
+                tableImageView.setImage(selectedCard.getImage());
+                for(int j = 0; j < machinePlayer.getCardsPlayer().size(); j++) {
+                    System.out.print( machinePlayer.getCardsPlayer().get(j).getColor() + " : " + machinePlayer.getCardsPlayer().get(j).getValue() + "  ,,,, ");
+                }
+                System.out.println();
+                //retorno la carta jugada
+                return selectedCard;
+            }
+        }
+
+        // Si en el ciclo anterior no se logro tirar ninguna carta, entonces devuelve null
+        return null;
+    }
+
+    /*
+    Metodo que maneja el que la maquina tome una carta y despues ceda el turno al jugador
+     */
+    private void handleTakeCard() {
+        machinePlayer.addCard(deck.takeCard());
+        //activar el boton para que el jugador pueda arrastrar
+        gameUnoController.buttonDeck.setDisable(false);
+        setHasPlayerPlayed(false);
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {

@@ -65,4 +65,12 @@ public class Card {
     public String getColor() {
         return color;
     }
+
+    /*
+    Este metodo lo que hara es retornar verdadero si la carta es alguna carta comodin
+    si no lo es pues retorna falso
+     */
+    public boolean isWild() {
+        return this.getValue().startsWith("SKIP") || this.getValue().startsWith("WILD") || this.getValue().startsWith("TWO_WILD") || this.getValue().startsWith("FOUR_WILD") || this.getValue().startsWith("RESERVE");
+    }
 }

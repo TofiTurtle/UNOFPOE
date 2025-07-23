@@ -2,6 +2,7 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -12,6 +13,7 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import org.example.eiscuno.view.GameUnoStage;
 
 import java.util.Objects;
 
@@ -29,13 +31,22 @@ public class GameUnoController {
     @FXML
     private ImageView tableImageView;
 
+    @FXML
+    public Button buttonDeck;
+
+    @FXML
+    private Button buttonExit;
+
+    @FXML
+    private Button buttonUNO;
+
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
     private Table table;
     public GameUno gameUno;
     private int posInitCardToShow;
-
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
 
@@ -45,6 +56,9 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+        Card firstCard = deck.takeCard();
+        table.addCardOnTheTable(firstCard);
+        tableImageView.setImage(firstCard.getImage());
         this.gameUno.startGame();
         printCardsHumanPlayer();
 
@@ -66,6 +80,7 @@ public class GameUnoController {
         this.table = new Table();
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
+
     }
 
     /**
@@ -86,16 +101,29 @@ public class GameUnoController {
                 if(table.isValidPlay(card) ) {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
+                    buttonDeck.setDisable(true);
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                    //pequeña logica para el +2
-                    if(card.getValue().equals("TWO_WILD")) {
-                        gameUno.eatCard(machinePlayer, 2);
-                        //machinePlayer.addCard(this.deck.takeCard());
-                        //machinePlayer.addCard(this.deck.takeCard());
+                    /*
+                    hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
+                    setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
+                     */
+                    if(card.isWild()) {
+                        //aqui guardo el resultado de la funcion que maneja los comodines
+                        String wildEffect = handleWildCard(card, machinePlayer);
+                        //si el resultado no es ninguna carta que se salte el turno de la maquina pues entonces le doy el turno a la maquina
+                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                            //pequeña logica para el +2
+                            if(card.getValue().equals("TWO_WILD")) {
+                                gameUno.eatCard(machinePlayer, 2);
+                                //machinePlayer.addCard(this.deck.takeCard());
+                                //machinePlayer.addCard(this.deck.takeCard());
+                            }
+                            threadPlayMachine.setHasPlayerPlayed(true);
+                        }
                     }
-
-
-                    threadPlayMachine.setHasPlayerPlayed(true);
+                    else {
+                        threadPlayMachine.setHasPlayerPlayed(true);
+                    }
 
                     printCardsHumanPlayer();
 
@@ -161,6 +189,8 @@ public class GameUnoController {
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
         humanPlayer.addCard(deck.takeCard());
+        buttonDeck.setDisable(true);
+        threadPlayMachine.setHasPlayerPlayed(true);
         printCardsHumanPlayer();
     }
 
@@ -177,11 +207,66 @@ public class GameUnoController {
     public int getPosInitCardToShow() {
         return posInitCardToShow;
     }
+
+    //este sera el metodo encargado de manejar los diferentes casos comodin, tambien debe recibir el jugador sobre el que tendra efecto
+    /*
+    Este metodo es el encargado de manejar los diferentes casos comodin
+    Recibe el jugador objtivo, o sea sobre el que van a sugur efecto las cartas de +2,+4,...
+    Para manejar los casos donde se quita el turno de el otro jugador
+    Esto se eliminara y se movera completamente a la clase gameUno
+     */
+    public String handleWildCard(Card card, Player targetPlayer) {
+        String valueCard = card.getValue();
+        Card auxCard;
+
+        switch (valueCard) {
+            case "SKIP":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "SKIP";
+
+            case "WILD":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "WILD";
+
+            case "TWO_WILD":
+                for (int i = 0; i < 2; i++) {
+                    auxCard = deck.takeCard();
+                    targetPlayer.addCard(auxCard);
+                }
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "TWO_WILD";
+
+            case "FOUR_WILD":
+                for (int i = 0; i < 4; i++) {
+                    auxCard = deck.takeCard();
+                    targetPlayer.addCard(auxCard);
+                }
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "FOUR_WILD";
+
+            case "RESERVE":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "RESERVE";
+
+            default:
+                return ("Caso no manejado aún, nombre carta: " + valueCard);
+        }
+    }
+
+    
+
+    @FXML
+    void onHandleExit(ActionEvent event) {
+        GameUnoStage.deleteInstance();
+    }
+
     //Getter para los Players
     public Player getMachinePlayer() {
         return machinePlayer;
     }
+
     public Player getHumanPlayer() {
         return humanPlayer;
     }
+
 }
