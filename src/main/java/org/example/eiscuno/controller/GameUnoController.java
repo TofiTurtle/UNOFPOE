@@ -109,19 +109,35 @@ public class GameUnoController {
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
                      */
-                    if(card.isWild()) {
-                        //aqui guardo el resultado de la funcion que maneja los comodines
-                        String wildEffect = handleWildCard(card, machinePlayer);
-                        //si el resultado no es ninguna carta que se salte el turno de la maquina pues entonces le doy el turno a la maquina
-                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
-                            //pequeña logica para el +2
-                            if(card.getValue().equals("TWO_WILD")) {
+                    if(card.isSpecial()) {
+                        switch (card.getValue())
+                        {
+                            case "SKIP":
+                                System.out.println("SKIP");
+                                threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador
+                                break;
+                            case "RESERVE":
+                                System.out.println("RESERVE");
+                                threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador
+                                break;
+                            case "WILD":
+                                System.out.println("WILD");
+                                threadPlayMachine.setHasPlayerPlayed(true);
+                                break;
+                            case "TWO_WILD":
+                                System.out.println("TWO_WILD");
                                 gameUno.eatCard(machinePlayer, 2);
-                                //machinePlayer.addCard(this.deck.takeCard());
-                                //machinePlayer.addCard(this.deck.takeCard());
-                            }
-                            threadPlayMachine.setHasPlayerPlayed(true);
+                                threadPlayMachine.setHasPlayerPlayed(true);
+                                break;
+                            case "FOUR_WILD":
+                                System.out.println("FOUR_WILD");
+                                gameUno.eatCard(machinePlayer, 4);
+                                threadPlayMachine.setHasPlayerPlayed(true);
+                                break;
+                            default:
+                                break;
                         }
+
                     }
                     else {
                         threadPlayMachine.setHasPlayerPlayed(true);
@@ -228,6 +244,10 @@ public class GameUnoController {
     Para manejar los casos donde se quita el turno de el otro jugador
     Esto se eliminara y se movera completamente a la clase gameUno
      */
+    /*Nota de Juan: si le hiciste pull o algo, de momento no uso esta funcion en el controller, mñna cambio
+    la logica para que quede mas compacto
+    *
+    * */
     public String handleWildCard(Card card, Player targetPlayer) {
         String valueCard = card.getValue();
         Card auxCard;
@@ -236,11 +256,20 @@ public class GameUnoController {
             case "SKIP":
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
                 return "SKIP";
-
             case "WILD":
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
                 return "WILD";
+            case "RESERVE":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "RESERVE";
+            case "TWO_WILD":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "TWO_WILD";
+            case "FOUR_WILD":
+                System.out.println("Caso manejado, nombre carta: " + valueCard);
+                return "FOUR_WILD";
 
+            /*
             case "TWO_WILD":
                 for (int i = 0; i < 2; i++) {
                     auxCard = deck.takeCard();
@@ -256,11 +285,7 @@ public class GameUnoController {
                 }
                 System.out.println("Caso manejado, nombre carta: " + valueCard);
                 return "FOUR_WILD";
-
-            case "RESERVE":
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "RESERVE";
-
+            */
             default:
                 return ("Caso no manejado aún, nombre carta: " + valueCard);
         }
