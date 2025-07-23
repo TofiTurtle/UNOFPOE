@@ -41,17 +41,24 @@ public class ThreadPlayMachine extends Thread {
                     e.printStackTrace();
                 }
 
-                // ahora obtenemos la carta que se jugo
+                // ahora obtenemos la carta que se jugo, esto tambien peude ser null
                 Card cardPlayed = putCardOnTheTable();
 
-                if(cardPlayed.isWild()) {
-                    String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
-                    if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
-                        hasPlayerPlayed = false;
-                    }
+                //si es null entonces arrastramos
+                if (cardPlayed == null) {
+                    handleTakeCard();
                 }
                 else {
-                    hasPlayerPlayed = false;
+                    //hacemos las comprobaciones de si es una carta comodin
+                    if(cardPlayed.isWild()) {
+                        String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
+                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                            hasPlayerPlayed = false;
+                        }
+                    }
+                    else {
+                        hasPlayerPlayed = false;
+                    }
                 }
 
 
@@ -63,63 +70,45 @@ public class ThreadPlayMachine extends Thread {
         }
     }
 
-    // este metodo ahora retorna la carta que se jugo, para despues hacer comprobaciones de si es comodin o que
+    // este metodo devuelve la carta que se jugo o null en el caso de que no tuviera carta valida para jugar
     private Card putCardOnTheTable(){
-        /*
-        La idea seria coger en una estructura de datos y poner las cartas actuales de la maquina, entonces en el
-        do while que escoja aleatoriamente y si no funciona la quite de esta estructura de datos, mas no de su mazo
-        y entonces si este mazo se queda vacio pues ahi si empezar a coger de la baraja de a una carta y ir probando hasta
-        que una funcione
-         */
-
-        //Aqui se crea una copia de las cartas en la baraja actual
-        ArrayList<Card> temporaryDeck = new ArrayList<>(machinePlayer.getCardsPlayer());
-        //Para verificar
-        for(int i = 0; i < temporaryDeck.size(); i++) {
-            System.out.print( temporaryDeck.get(i).getColor() + " : " + temporaryDeck.get(i).getValue() + "  ,,,, ");
-        }
-
-        int index = (int) (Math.random() * temporaryDeck.size());
         Card selectedCard;
 
-        do {
-            /*
-            En este punto la maquina hace random para coger aleatoriamente sus cartas hasta que sea valido ponerlas
-            Aqui hay un problema y esque si no tiene ninguna valida esto es infinito, entonces para esto hay que usar la baraja, pero despues
-            de probar con todas sus cartas
-             */
+        //se crea una copia de el mazo actual de la maquina para iterar sobre esta
+        ArrayList<Card> machineDeck = new ArrayList<>(machinePlayer.getCardsPlayer());
 
-            /*
-            Si el temporarydeck esta vacio es porque ya usamos todas las cartas y ninguna funciono
-             */
-            if (temporaryDeck.isEmpty()) {
-                selectedCard = deck.takeCard();
-                machinePlayer.addCard(selectedCard);
-            } else {
-                index = (int) (Math.random() * temporaryDeck.size());
-                selectedCard = temporaryDeck.get(index);
-                temporaryDeck.remove(index);
-            }
-
-            System.out.println("lo intenta");
-        } while(!table.isValidPlay(selectedCard));
-
-        // Verificar que si se esten borrando correctamente, esto se puede borrar despues
+        //Para verificar comportamiento
         for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            System.out.print( machinePlayer.getCard(i).getColor() + " : " + machinePlayer.getCard(i).getValue() + "  ,,,, ");
+            System.out.print( machinePlayer.getCardsPlayer().get(i).getColor() + " : " + machinePlayer.getCardsPlayer().get(i).getValue() + "  ,,,, ");
         }
         System.out.println();
 
-        // esto no, esta es la logica de borrar
-        machinePlayer.getCardsPlayer().remove(selectedCard);
-        tableImageView.setImage(selectedCard.getImage());
-
-        // esto tambien se puede borrar, solo es para verficar
-        for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            System.out.print( machinePlayer.getCard(i).getColor() + " : " + machinePlayer.getCard(i).getValue() + "  ,,,, ");
+        //iteramos sobre el mazo de la maquina uno por uno comprobando  que se pueda lanzar una carta
+        for(int i = 0; i < machineDeck.size(); i++) {
+            selectedCard = machineDeck.get(i);
+            if(table.isValidPlay(selectedCard)) {
+                //si la carta fue valida entonces la borro de el mazo original de la maquina y la seteo en la mesa
+                machinePlayer.getCardsPlayer().remove(selectedCard);
+                tableImageView.setImage(selectedCard.getImage());
+                for(int j = 0; j < machinePlayer.getCardsPlayer().size(); j++) {
+                    System.out.print( machinePlayer.getCardsPlayer().get(j).getColor() + " : " + machinePlayer.getCardsPlayer().get(j).getValue() + "  ,,,, ");
+                }
+                System.out.println();
+                //retorno la carta jugada
+                return selectedCard;
+            }
         }
 
-        return selectedCard;
+        // Si en el ciclo anterior no se logro tirar ninguna carta, entonces devuelve null
+        return null;
+    }
+
+    /*
+    Metodo que maneja el que la maquina tome una carta y despues ceda el turno al jugador
+     */
+    private void handleTakeCard() {
+        machinePlayer.addCard(deck.takeCard());
+        setHasPlayerPlayed(false);
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {

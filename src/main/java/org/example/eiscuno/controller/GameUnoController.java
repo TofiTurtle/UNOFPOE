@@ -161,6 +161,7 @@ public class GameUnoController {
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
         humanPlayer.addCard(deck.takeCard());
+        threadPlayMachine.setHasPlayerPlayed(true);
         printCardsHumanPlayer();
     }
 
