@@ -3,6 +3,7 @@ package org.example.eiscuno.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -61,6 +62,7 @@ public class GameUnoController {
         tableImageView.setImage(firstCard.getImage());
         this.gameUno.startGame();
         printCardsHumanPlayer();
+        printCardsMachinePlayer();
 
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
@@ -133,6 +135,17 @@ public class GameUnoController {
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
+        }
+    }
+
+    public void printCardsMachinePlayer() {
+        this.gridPaneCardsMachine.getChildren().clear();
+        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePlayer();
+
+        for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
+            Card card = currentVisibleCardsMachinePlayer[i];
+            ImageView cardImageView = card.createCardImageViewBack();
+            this.gridPaneCardsMachine.add(cardImageView, i, 0);
         }
     }
 

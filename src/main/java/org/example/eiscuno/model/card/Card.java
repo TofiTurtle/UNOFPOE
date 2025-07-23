@@ -40,6 +40,14 @@ public class Card {
         return card;
     }
 
+    public ImageView createCardImageViewBack() {
+        ImageView card = new ImageView(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
+        card.setY(16);
+        card.setFitHeight(90);
+        card.setFitWidth(70);
+        return card;
+    }
+
     /**
      * Gets the ImageView representation of the card.
      *
@@ -57,6 +65,8 @@ public class Card {
     public Image getImage() {
         return image;
     }
+
+
 
     public String getValue() {
         return value;
