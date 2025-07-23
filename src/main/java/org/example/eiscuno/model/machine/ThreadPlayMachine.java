@@ -61,7 +61,6 @@ public class ThreadPlayMachine extends Thread {
                     }
                 }
 
-
                 //aqui volvemos a habilitar el mazo de el jugador
                 Platform.runLater(() -> {
                     gameUnoController.gridPaneCardsPlayer.setDisable(false);
