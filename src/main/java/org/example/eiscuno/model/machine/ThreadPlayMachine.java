@@ -73,11 +73,22 @@ public class ThreadPlayMachine extends Thread {
 
     // este metodo devuelve la carta que se jugo o null en el caso de que no tuviera carta valida para jugar
     private Card putCardOnTheTable(){
-        Card selectedCard;
-
+        
         //se crea una copia de el mazo actual de la maquina para iterar sobre esta
         ArrayList<Card> machineDeck = new ArrayList<>(machinePlayer.getCardsPlayer());
+        //Para verificar
+        System.out.println("----------------------------------------------\n" +
+                           "       Mazo Maquina Antes de Lanzar: ");
+        for(int i = 0; i < machineDeck.size(); i++) {
+            System.out.print( machineDeck.get(i).getColor() + ": " + machineDeck.get(i).getValue() + "\n");
+        }
+        System.out.println("----------------------------------------------\n");
 
+        int index = (int) (Math.random() * machineDeck.size());
+
+        Card selectedCard;
+
+        
         //Para verificar comportamiento
         for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
             System.out.print( machinePlayer.getCardsPlayer().get(i).getColor() + " : " + machinePlayer.getCardsPlayer().get(i).getValue() + "  ,,,, ");

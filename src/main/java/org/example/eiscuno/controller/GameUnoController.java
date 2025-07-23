@@ -94,6 +94,9 @@ public class GameUnoController {
             Card card = currentVisibleCardsHumanPlayer[i];
             ImageView cardImageView = card.getCard();
 
+            /*
+            * Aqui es donde Player Juega una carta
+            * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if(table.isValidPlay(card) ) {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
@@ -109,6 +112,12 @@ public class GameUnoController {
                         String wildEffect = handleWildCard(card, machinePlayer);
                         //si el resultado no es ninguna carta que se salte el turno de la maquina pues entonces le doy el turno a la maquina
                         if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                            //pequeña logica para el +2
+                            if(card.getValue().equals("TWO_WILD")) {
+                                gameUno.eatCard(machinePlayer, 2);
+                                //machinePlayer.addCard(this.deck.takeCard());
+                                //machinePlayer.addCard(this.deck.takeCard());
+                            }
                             threadPlayMachine.setHasPlayerPlayed(true);
                         }
                     }
@@ -117,6 +126,9 @@ public class GameUnoController {
                     }
 
                     printCardsHumanPlayer();
+
+
+
                 }
             });
 
@@ -196,12 +208,12 @@ public class GameUnoController {
         return posInitCardToShow;
     }
 
-
     //este sera el metodo encargado de manejar los diferentes casos comodin, tambien debe recibir el jugador sobre el que tendra efecto
     /*
     Este metodo es el encargado de manejar los diferentes casos comodin
     Recibe el jugador objtivo, o sea sobre el que van a sugur efecto las cartas de +2,+4,...
     Para manejar los casos donde se quita el turno de el otro jugador
+    Esto se eliminara y se movera completamente a la clase gameUno
      */
     public String handleWildCard(Card card, Player targetPlayer) {
         String valueCard = card.getValue();
@@ -241,13 +253,20 @@ public class GameUnoController {
         }
     }
 
-    public Player getHumanPlayer() {
-        return humanPlayer;
-    }
+    
 
     @FXML
     void onHandleExit(ActionEvent event) {
         GameUnoStage.deleteInstance();
+    }
+
+    //Getter para los Players
+    public Player getMachinePlayer() {
+        return machinePlayer;
+    }
+
+    public Player getHumanPlayer() {
+        return humanPlayer;
     }
 
 }
