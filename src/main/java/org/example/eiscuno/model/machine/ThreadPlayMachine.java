@@ -50,7 +50,7 @@ public class ThreadPlayMachine extends Thread {
                 }
                 else {
                     //hacemos las comprobaciones de si es una carta comodin
-                    if(cardPlayed.isWild()) {
+                    if(cardPlayed.isSpecial()) {
                         String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
                         if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
                             gameUnoController.buttonDeck.setDisable(false);
@@ -85,15 +85,8 @@ public class ThreadPlayMachine extends Thread {
         System.out.println("----------------------------------------------\n");
 
         int index = (int) (Math.random() * machineDeck.size());
-
         Card selectedCard;
 
-        
-        //Para verificar comportamiento
-        for(int i = 0; i < machinePlayer.getCardsPlayer().size(); i++) {
-            System.out.print( machinePlayer.getCardsPlayer().get(i).getColor() + " : " + machinePlayer.getCardsPlayer().get(i).getValue() + "  ,,,, ");
-        }
-        System.out.println();
 
         //iteramos sobre el mazo de la maquina uno por uno comprobando  que se pueda lanzar una carta
         for(int i = 0; i < machineDeck.size(); i++) {
@@ -102,10 +95,15 @@ public class ThreadPlayMachine extends Thread {
                 //si la carta fue valida entonces la borro de el mazo original de la maquina y la seteo en la mesa
                 machinePlayer.getCardsPlayer().remove(selectedCard);
                 tableImageView.setImage(selectedCard.getImage());
+
+
+                System.out.println("----------------------------------------------\n" +
+                        "       Mazo Maquina DESPUES de Lanzar: ");
                 for(int j = 0; j < machinePlayer.getCardsPlayer().size(); j++) {
-                    System.out.print( machinePlayer.getCardsPlayer().get(j).getColor() + " : " + machinePlayer.getCardsPlayer().get(j).getValue() + "  ,,,, ");
+                    System.out.print( machinePlayer.getCardsPlayer().get(j).getColor() + ": " + machinePlayer.getCardsPlayer().get(j).getValue() + "\n");
                 }
-                System.out.println();
+                System.out.println("----------------------------------------------\n");
+
                 //retorno la carta jugada
                 return selectedCard;
             }
