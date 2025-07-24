@@ -51,11 +51,12 @@ public class ThreadPlayMachine extends Thread {
                 else {
                     //hacemos las comprobaciones de si es una carta comodin
                     if(cardPlayed.isSpecial()) {
-                        String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
-                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
-                            gameUnoController.buttonDeck.setDisable(false);
-                            hasPlayerPlayed = false;
-                        }
+                        gameUnoController.handleSpecialCard(cardPlayed,gameUnoController.getHumanPlayer());
+                        //String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
+                        //if!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                         //   gameUnoController.buttonDeck.setDisable(false);
+                           // hasPlayerPlayed = false;
+                        //}
                     }
                     else {
                         gameUnoController.buttonDeck.setDisable(false);
