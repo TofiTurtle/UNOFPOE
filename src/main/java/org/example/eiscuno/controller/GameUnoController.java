@@ -18,10 +18,7 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Controller class for the Uno game.
@@ -296,14 +293,17 @@ public class GameUnoController {
                         Optional<String> result = dialog.showAndWait();
                         result.ifPresent(color -> {
                             System.out.println("Color seleccionado: " + color);
-                            color = translateColor(color);
                             //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
-                            card.setColor(color);
+                            card.setColor(translateColor(color));
                         });
-
-                        threadPlayMachine.setHasPlayerPlayed(true); //se le da a la maquina
+                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno a la maquina
                     }else{
-                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
+                        Random random = new Random();
+                        int index = random.nextInt(options.size());
+                        String color = options.get(index);
+                        card.setColor(translateColor(color));
+                        System.out.println("Color escogido: " + color);
+                        //threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
                     }
                     break;
                 case "TWO_WILD":
@@ -313,7 +313,7 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
-                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        //threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
                     }
                     break;
                 case "FOUR_WILD":
@@ -334,7 +334,12 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
-                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        Random random = new Random();
+                        int index = random.nextInt(options.size());
+                        String color = options.get(index);
+                        card.setColor(translateColor(color));
+                        System.out.println("Color escogido: " + color);
+                        // threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
                     }
                     break;
                 default:

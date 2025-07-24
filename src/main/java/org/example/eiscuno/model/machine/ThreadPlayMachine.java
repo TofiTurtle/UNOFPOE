@@ -44,6 +44,9 @@ public class ThreadPlayMachine extends Thread {
                 // ahora obtenemos la carta que se jugo, esto tambien peude ser null
                 Card cardPlayed = putCardOnTheTable();
 
+                Platform.runLater(() -> {
+                    gameUnoController.printCardsMachinePlayer();
+                });
                 //si es null entonces arrastramos
                 if (cardPlayed == null) {
                     handleTakeCard();
@@ -66,11 +69,6 @@ public class ThreadPlayMachine extends Thread {
                         hasPlayerPlayed = false;
                     }
                 }
-
-
-                Platform.runLater(() -> {
-                    gameUnoController.printCardsMachinePlayer();
-                });
 
                 //esto iria con un condicional y pondriamos una alerta o algo asi
                 gameUnoController.gameUno.isGameOver();
