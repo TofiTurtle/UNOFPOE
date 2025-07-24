@@ -40,7 +40,6 @@ public class ThreadPlayMachine extends Thread {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                gameUnoController.deactivateEmptyDeck();
 
                 // ahora obtenemos la carta que se jugo, esto tambien peude ser null
                 Card cardPlayed = putCardOnTheTable();
@@ -58,6 +57,7 @@ public class ThreadPlayMachine extends Thread {
                          //   gameUnoController.buttonDeck.setDisable(false);
                            // hasPlayerPlayed = false;
                         //}
+
                     }
                     else {
                         gameUnoController.buttonDeck.setDisable(false);
@@ -127,10 +127,16 @@ public class ThreadPlayMachine extends Thread {
     Metodo que maneja el que la maquina tome una carta y despues ceda el turno al jugador
      */
     private void handleTakeCard() {
-        machinePlayer.addCard(deck.takeCard());
-        //activar el boton para que el jugador pueda arrastrar
-        gameUnoController.buttonDeck.setDisable(false);
-        setHasPlayerPlayed(false);
+        if(deck.isEmpty()) {
+            System.out.println("El mazo esta vacio, no se puede arrastrar");
+            gameUnoController.deactivateEmptyDeck();
+        }
+        else {
+            machinePlayer.addCard(deck.takeCard());
+            //activar el boton para que el jugador pueda arrastrar
+            gameUnoController.buttonDeck.setDisable(false);
+            setHasPlayerPlayed(false);
+        }
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {
