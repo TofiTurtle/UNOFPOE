@@ -2,7 +2,9 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -16,7 +18,10 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Controller class for the Uno game.
@@ -127,8 +132,6 @@ public class GameUnoController {
                     }else{
                         buttonDeck.setDisable(true);
                     }
-
-
 
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
@@ -248,6 +251,12 @@ public class GameUnoController {
     *
     * */
     public void handleSpecialCard(Card card, Player targetPlayer) {
+        List<String> options = Arrays.asList("Rojo", "Verde", "Azul","Amarillo");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("Rojo", options);
+        dialog.setTitle("Seleccionar color");
+        dialog.setHeaderText("Escoge un color");
+        dialog.setContentText("Colores disponibles:");
+
 
         switch (card.getValue())
         {
@@ -275,9 +284,20 @@ public class GameUnoController {
                     * */
                     System.out.println("WILD USED!");
                     if (targetPlayer == machinePlayer) {
-                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno igual al jugador
+                        printCardsHumanPlayer();
+
+                        //logica para cambiar el color del juego
+                        Optional<String> result = dialog.showAndWait();
+                        result.ifPresent(color -> {
+                            System.out.println("Color seleccionado: " + color);
+                            color = translateColor(color);
+                            //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
+                            card.setColor(color);
+                        });
+
+                        threadPlayMachine.setHasPlayerPlayed(true); //se le da a la maquina
                     }else{
-                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno a la maquina
+                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
                     }
                     break;
                 case "TWO_WILD":
@@ -294,6 +314,17 @@ public class GameUnoController {
                     System.out.println("FOUR_WILD USED! +4");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
                         gameUno.eatCard(machinePlayer, 4); //la machin come 4
+                        printCardsHumanPlayer();
+
+                        //logica para cambiar el color del juego
+                        Optional<String> result = dialog.showAndWait();
+                        result.ifPresent(color -> {
+                            System.out.println("Color seleccionado: " + color);
+                            color = translateColor(color);
+                            //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
+                            card.setColor(color);
+                        });
+
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
@@ -324,6 +355,16 @@ public class GameUnoController {
 
     public Player getHumanPlayer() {
         return humanPlayer;
+    }
+
+    public String translateColor(String toTranslate) {
+        return switch (toTranslate) {
+            case "Amarillo" -> "YELLOW";
+            case "Azul" -> "BLUE";
+            case "Rojo" -> "RED";
+            case "Verde" -> "GREEN";
+            default -> null;
+        };
     }
 
 }
