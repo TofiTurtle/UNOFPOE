@@ -121,7 +121,6 @@ public class GameUnoController {
             * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if(table.isValidPlay(card) ) {
-                    deactivateEmptyDeck();
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
@@ -219,10 +218,17 @@ public class GameUnoController {
          Ahora el jugador llama a su metodo de agregar una carta
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
-        humanPlayer.addCard(deck.takeCard());
-        buttonDeck.setDisable(true);
-        threadPlayMachine.setHasPlayerPlayed(true);
-        printCardsHumanPlayer();
+        if(deck.isEmpty()) {
+            deactivateEmptyDeck();
+            System.out.println("Mazo vacio");
+        }
+        else {
+            humanPlayer.addCard(deck.takeCard());
+            buttonDeck.setDisable(true);
+            threadPlayMachine.setHasPlayerPlayed(true);
+            printCardsHumanPlayer();
+        }
+
     }
 
     /**
