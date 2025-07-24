@@ -2,6 +2,8 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -12,6 +14,9 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import org.example.eiscuno.view.GameUnoStage;
+
+import java.util.Objects;
 
 /**
  * Controller class for the Uno game.
@@ -22,18 +27,27 @@ public class GameUnoController {
     private GridPane gridPaneCardsMachine;
 
     @FXML
-    private GridPane gridPaneCardsPlayer;
+    public GridPane gridPaneCardsPlayer;
 
     @FXML
     private ImageView tableImageView;
+
+    @FXML
+    public Button buttonDeck;
+
+    @FXML
+    private Button buttonExit;
+
+    @FXML
+    private Button buttonUNO;
+
 
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
     private Table table;
-    private GameUno gameUno;
+    public GameUno gameUno;
     private int posInitCardToShow;
-
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
 
@@ -43,14 +57,18 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
+        Card firstCard = deck.takeCard();
+        table.addCardOnTheTable(firstCard);
+        tableImageView.setImage(firstCard.getImage());
         this.gameUno.startGame();
         printCardsHumanPlayer();
+        printCardsMachinePlayer();
 
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
     }
 
@@ -64,6 +82,7 @@ public class GameUnoController {
         this.table = new Table();
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
+
     }
 
     /**
@@ -77,16 +96,53 @@ public class GameUnoController {
             Card card = currentVisibleCardsHumanPlayer[i];
             ImageView cardImageView = card.getCard();
 
+            /*
+            * Aqui es donde Player Juega una carta
+            * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                // Aqui deberian verificar si pueden en la tabla jugar esa carta
-                gameUno.playCard(card);
-                tableImageView.setImage(card.getImage());
-                humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                threadPlayMachine.setHasPlayerPlayed(true);
-                printCardsHumanPlayer();
+                if(table.isValidPlay(card) ) {
+                    // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
+                    tableImageView.setImage(card.getImage());
+                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
+                    //y este pueda seguir tomando cartas
+                    if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
+                        buttonDeck.setDisable(false);
+                    }else{
+                        buttonDeck.setDisable(true);
+                    }
+
+
+
+                    /*
+                    hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
+                    setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
+                     */
+                    if(card.isSpecial()) { //si ES especial
+                        handleSpecialCard(card,machinePlayer); //dependiendo del caso, aplique efecto
+                    }
+                    else { //si no es especial... (normal )
+                        threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
+                    }
+                    printCardsHumanPlayer();
+
+
+
+                }
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
+        }
+    }
+
+    public void printCardsMachinePlayer() {
+        this.gridPaneCardsMachine.getChildren().clear();
+        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePlayer();
+
+        for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
+            Card card = currentVisibleCardsMachinePlayer[i];
+            ImageView cardImageView = card.createCardImageViewBack();
+            this.gridPaneCardsMachine.add(cardImageView, i, 0);
         }
     }
 
@@ -138,7 +194,14 @@ public class GameUnoController {
      */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
-        // Implement logic to take a card here
+        /*
+         Ahora el jugador llama a su metodo de agregar una carta
+          y a su vez llama a la baraja para que le muestra la carta del peek y la quite
+         */
+        humanPlayer.addCard(deck.takeCard());
+        buttonDeck.setDisable(true);
+        threadPlayMachine.setHasPlayerPlayed(true);
+        printCardsHumanPlayer();
     }
 
     /**
@@ -150,4 +213,95 @@ public class GameUnoController {
     void onHandleUno(ActionEvent event) {
         // Implement logic to handle Uno event here
     }
+
+    public int getPosInitCardToShow() {
+        return posInitCardToShow;
+    }
+
+    //este sera el metodo encargado de manejar los diferentes casos comodin, tambien debe recibir el jugador sobre el que tendra efecto
+    /*
+    Este metodo es el encargado de manejar los diferentes casos comodin
+    Recibe el jugador objtivo, o sea sobre el que van a sugur efecto las cartas de +2,+4,...
+    Para manejar los casos donde se quita el turno de el otro jugador
+    Esto se eliminara y se movera completamente a la clase gameUno
+     */
+    /*Nota de Juan: si le hiciste pull o algo, de momento no uso esta funcion en el controller, mñna cambio
+    la logica para que quede mas compacto
+    *
+    * */
+    public void handleSpecialCard(Card card, Player targetPlayer) {
+
+        switch (card.getValue())
+        {
+                case "SKIP":
+                    System.out.println("SKIP USED!");
+                    if (targetPlayer == machinePlayer) { //"si lo tiro el jugador"
+                        threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
+                    }else{ //"sino (si lo tiro la machine)"
+                        threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                    }
+                    break;
+                case "RESERVE":
+                    System.out.println("RESERVE USED!");
+                    if (targetPlayer == machinePlayer) {
+                        threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
+                    }else{
+                        threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                    }
+                    break;
+                case "WILD":
+                    /*Aqui hace falta hacer una implementacion de crear un menu interactivo para
+                    escoger el color que se escoge con la carta WILD.
+                    De momento solo "pasa" el turno", no tiene efecto alguno, solo que se puede tirar en
+                    cualquier momento.
+                    * */
+                    System.out.println("WILD USED!");
+                    if (targetPlayer == machinePlayer) {
+                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno igual al jugador
+                    }else{
+                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno a la maquina
+                    }
+                    break;
+                case "TWO_WILD":
+                    System.out.println("TWO_WILD USED! +2");
+                    if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
+                        gameUno.eatCard(machinePlayer, 2); //la machin come 2
+                        threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
+                    }else{ //si lo tiro la machin
+                        gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
+                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                    }
+                    break;
+                case "FOUR_WILD":
+                    System.out.println("FOUR_WILD USED! +4");
+                    if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
+                        gameUno.eatCard(machinePlayer, 4); //la machin come 4
+                        threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
+                    }else{ //si lo tiro la machin
+                        gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
+                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                    }
+                    break;
+                default:
+                    System.out.println("Error, caso NO manejado!");
+
+            }
+    }
+
+    
+
+    @FXML
+    void onHandleExit(ActionEvent event) {
+        GameUnoStage.deleteInstance();
+    }
+
+    //Getter para los Players
+    public Player getMachinePlayer() {
+        return machinePlayer;
+    }
+
+    public Player getHumanPlayer() {
+        return humanPlayer;
+    }
+
 }

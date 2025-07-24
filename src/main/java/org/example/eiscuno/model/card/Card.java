@@ -40,6 +40,14 @@ public class Card {
         return card;
     }
 
+    public ImageView createCardImageViewBack() {
+        ImageView card = new ImageView(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
+        card.setY(16);
+        card.setFitHeight(90);
+        card.setFitWidth(70);
+        return card;
+    }
+
     /**
      * Gets the ImageView representation of the card.
      *
@@ -58,11 +66,21 @@ public class Card {
         return image;
     }
 
+
+
     public String getValue() {
         return value;
     }
 
     public String getColor() {
         return color;
+    }
+
+    /*
+    Este metodo lo que hara es retornar verdadero si la carta es alguna carta comodin
+    si no lo es pues retorna falso
+     */
+    public boolean isSpecial() {
+        return this.getValue().startsWith("SKIP") || this.getValue().startsWith("WILD") || this.getValue().startsWith("TWO_WILD") || this.getValue().startsWith("FOUR_WILD") || this.getValue().startsWith("RESERVE");
     }
 }

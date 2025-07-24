@@ -37,6 +37,8 @@ public class GameUno implements IGameUno {
      */
     @Override
     public void startGame() {
+        System.out.println("-----------------------------\n" +
+                           "   CARTAS DEL JUGADOR/MAQUINA: ");
         for (int i = 0; i < 10; i++) {
             if (i < 5) {
                 humanPlayer.addCard(this.deck.takeCard());
@@ -56,6 +58,7 @@ public class GameUno implements IGameUno {
     public void eatCard(Player player, int numberOfCards) {
         for (int i = 0; i < numberOfCards; i++) {
             player.addCard(this.deck.takeCard());
+            System.out.println("***card eated***");
         }
     }
 
@@ -101,6 +104,21 @@ public class GameUno implements IGameUno {
 
         return cards;
     }
+
+    //una copia de el metodo para mostrar las cartas del jugador, solo que para la maquina no necesitamos movernos entonces no usamos posInitCardToShow
+    public Card[] getCurrentVisibleCardsMachinePlayer() {
+        int totalCards = this.machinePlayer.getCardsPlayer().size();
+        int numVisibleCards = Math.min(4, totalCards);
+        Card[] cards = new Card[numVisibleCards];
+
+        for (int i = 0; i < numVisibleCards; i++) {
+            cards[i] = this.machinePlayer.getCard( i);
+        }
+
+
+        return cards;
+    }
+
 
     /**
      * Checks if the game is over.
