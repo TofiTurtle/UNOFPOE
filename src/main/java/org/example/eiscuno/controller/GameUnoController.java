@@ -103,8 +103,17 @@ public class GameUnoController {
                 if(table.isValidPlay(card) ) {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
-                    buttonDeck.setDisable(true);
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
+                    //y este pueda seguir tomando cartas
+                    if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
+                        buttonDeck.setDisable(false);
+                    }else{
+                        buttonDeck.setDisable(true);
+                    }
+
+
+
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
