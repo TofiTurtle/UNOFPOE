@@ -50,6 +50,7 @@ public class GameUnoController {
     private int posInitCardToShow;
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
+    private boolean initialValidCard = false;
 
     /**
      * Initializes the controller.
@@ -57,9 +58,23 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
-        Card firstCard = deck.takeCard();
-        table.addCardOnTheTable(firstCard);
-        tableImageView.setImage(firstCard.getImage());
+
+        //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
+        while(!initialValidCard) //mientras que NO sea una carta inicial valida, se repetira...
+        {
+            Card firstCard = deck.takeCard(); //tomamos la carta arriba de la pila
+            if(!firstCard.isSpecial()) //Si NO es especial
+            {
+                initialValidCard = true; //"Desbloqueamos" el ciclo while para que siga el programa
+                table.addCardOnTheTable(firstCard); //ponemos la carta en la table
+                tableImageView.setImage(firstCard.getImage()); //ponemos la IMAGEN de esta
+            }else //si SI es especial
+            {
+                deck.addCardToDeck(firstCard); //llamamos al metodo addCardtodeck (de Clase deck)
+            }
+        }
+        //el resto de codigo se ejecuta ordinariamente...
+
         this.gameUno.startGame();
         printCardsHumanPlayer();
         printCardsMachinePlayer();
@@ -101,50 +116,34 @@ public class GameUnoController {
             * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if(table.isValidPlay(card) ) {
+                    deactivateEmptyDeck();
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
-                    buttonDeck.setDisable(true);
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
+                    //y este pueda seguir tomando cartas
+                    if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
+                        buttonDeck.setDisable(false);
+                    }else{
+                        buttonDeck.setDisable(true);
+                    }
+
+
+
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
                      */
-                    if(card.isSpecial()) {
-                        switch (card.getValue())
-                        {
-                            case "SKIP":
-                                System.out.println("SKIP");
-                                threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador
-                                break;
-                            case "RESERVE":
-                                System.out.println("RESERVE");
-                                threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador
-                                break;
-                            case "WILD":
-                                System.out.println("WILD");
-                                threadPlayMachine.setHasPlayerPlayed(true);
-                                break;
-                            case "TWO_WILD":
-                                System.out.println("TWO_WILD");
-                                gameUno.eatCard(machinePlayer, 2);
-                                threadPlayMachine.setHasPlayerPlayed(true);
-                                break;
-                            case "FOUR_WILD":
-                                System.out.println("FOUR_WILD");
-                                gameUno.eatCard(machinePlayer, 4);
-                                threadPlayMachine.setHasPlayerPlayed(true);
-                                break;
-                            default:
-                                break;
-                        }
-
+                    if(card.isSpecial()) { //si ES especial
+                        handleSpecialCard(card,machinePlayer); //dependiendo del caso, aplique efecto
                     }
-                    else {
-                        threadPlayMachine.setHasPlayerPlayed(true);
+                    else { //si no es especial... (normal )
+                        threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
                     }
-
                     printCardsHumanPlayer();
 
+                    //esto iria con un condicional y pondriamos una alerta o algo asi
+                    gameUno.isGameOver();
 
 
                 }
@@ -248,50 +247,70 @@ public class GameUnoController {
     la logica para que quede mas compacto
     *
     * */
-    public String handleWildCard(Card card, Player targetPlayer) {
-        String valueCard = card.getValue();
-        Card auxCard;
+    public void handleSpecialCard(Card card, Player targetPlayer) {
 
-        switch (valueCard) {
-            case "SKIP":
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "SKIP";
-            case "WILD":
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "WILD";
-            case "RESERVE":
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "RESERVE";
-            case "TWO_WILD":
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "TWO_WILD";
-            case "FOUR_WILD":
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "FOUR_WILD";
+        switch (card.getValue())
+        {
+                case "SKIP":
+                    System.out.println("SKIP USED!");
+                    if (targetPlayer == machinePlayer) { //"si lo tiro el jugador"
+                        threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
+                    }else{ //"sino (si lo tiro la machine)"
+                        threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                    }
+                    break;
+                case "RESERVE":
+                    System.out.println("RESERVE USED!");
+                    if (targetPlayer == machinePlayer) {
+                        threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
+                    }else{
+                        threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                    }
+                    break;
+                case "WILD":
+                    /*Aqui hace falta hacer una implementacion de crear un menu interactivo para
+                    escoger el color que se escoge con la carta WILD.
+                    De momento solo "pasa" el turno", no tiene efecto alguno, solo que se puede tirar en
+                    cualquier momento.
+                    * */
+                    System.out.println("WILD USED!");
+                    if (targetPlayer == machinePlayer) {
+                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno igual al jugador
+                    }else{
+                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno a la maquina
+                    }
+                    break;
+                case "TWO_WILD":
+                    System.out.println("TWO_WILD USED! +2");
+                    if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
+                        gameUno.eatCard(machinePlayer, 2); //la machin come 2
+                        threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
+                    }else{ //si lo tiro la machin
+                        gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
+                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                    }
+                    break;
+                case "FOUR_WILD":
+                    System.out.println("FOUR_WILD USED! +4");
+                    if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
+                        gameUno.eatCard(machinePlayer, 4); //la machin come 4
+                        threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
+                    }else{ //si lo tiro la machin
+                        gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
+                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                    }
+                    break;
+                default:
+                    System.out.println("Error, caso NO manejado!");
 
-            /*
-            case "TWO_WILD":
-                for (int i = 0; i < 2; i++) {
-                    auxCard = deck.takeCard();
-                    targetPlayer.addCard(auxCard);
-                }
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "TWO_WILD";
-
-            case "FOUR_WILD":
-                for (int i = 0; i < 4; i++) {
-                    auxCard = deck.takeCard();
-                    targetPlayer.addCard(auxCard);
-                }
-                System.out.println("Caso manejado, nombre carta: " + valueCard);
-                return "FOUR_WILD";
-            */
-            default:
-                return ("Caso no manejado aún, nombre carta: " + valueCard);
-        }
+            }
     }
 
-    
+    public void deactivateEmptyDeck() {
+        if(deck.isEmpty()) {
+            buttonDeck.setDisable(true);
+        }
+    }
 
     @FXML
     void onHandleExit(ActionEvent event) {

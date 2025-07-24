@@ -40,6 +40,7 @@ public class ThreadPlayMachine extends Thread {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                gameUnoController.deactivateEmptyDeck();
 
                 // ahora obtenemos la carta que se jugo, esto tambien peude ser null
                 Card cardPlayed = putCardOnTheTable();
@@ -51,11 +52,12 @@ public class ThreadPlayMachine extends Thread {
                 else {
                     //hacemos las comprobaciones de si es una carta comodin
                     if(cardPlayed.isSpecial()) {
-                        String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
-                        if(!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
-                            gameUnoController.buttonDeck.setDisable(false);
-                            hasPlayerPlayed = false;
-                        }
+                        gameUnoController.handleSpecialCard(cardPlayed,gameUnoController.getHumanPlayer());
+                        //String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
+                        //if!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
+                         //   gameUnoController.buttonDeck.setDisable(false);
+                           // hasPlayerPlayed = false;
+                        //}
                     }
                     else {
                         gameUnoController.buttonDeck.setDisable(false);
@@ -63,9 +65,13 @@ public class ThreadPlayMachine extends Thread {
                     }
                 }
 
+
                 Platform.runLater(() -> {
                     gameUnoController.printCardsMachinePlayer();
                 });
+
+                //esto iria con un condicional y pondriamos una alerta o algo asi
+                gameUnoController.gameUno.isGameOver();
 
                 //aqui volvemos a habilitar el mazo de el jugador
                 Platform.runLater(() -> {
