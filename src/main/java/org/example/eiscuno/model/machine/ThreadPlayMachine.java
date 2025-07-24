@@ -66,7 +66,6 @@ public class ThreadPlayMachine extends Thread {
                 }
 
                 // reactivar UI del jugador
-                Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
                 Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(false));
             }
         }

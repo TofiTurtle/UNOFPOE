@@ -331,6 +331,7 @@ public class GameUnoController {
                         String color = options.get(index);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
+                        buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
@@ -344,6 +345,7 @@ public class GameUnoController {
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
                         printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
@@ -372,6 +374,7 @@ public class GameUnoController {
                         String color = options.get(index);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
+                        buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false);//el turno ahora es del player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
