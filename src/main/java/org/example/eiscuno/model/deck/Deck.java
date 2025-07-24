@@ -130,4 +130,16 @@ public class Deck {
     public boolean isEmpty() {
         return deckOfCards.isEmpty();
     }
+
+    /*Nuevo metodo addCardToDeck se crea para prevenir que la carta inicial sea una carta especial
+    Lo que este hace es: lo llamamos cuando detectamos que se tiene una carta especial, entonces
+    lo que el hace es tomar la carta y pushearla en el mazo de nuevo. (quedando en la parte superior
+    de la pila). Por lo que, para no quedar en un bucle infinito, sencillamente re-barajamos el mazo
+    una vez mas.
+    ->al estar esto dentro del do while, se hace hasta que la carta inicial sea valida!
+     */
+    public void addCardToDeck (Card card) {
+        deckOfCards.push(card); //lo manda arriba de la pila
+        Collections.shuffle(deckOfCards); //lo mezcla
+    }
 }

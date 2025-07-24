@@ -50,6 +50,7 @@ public class GameUnoController {
     private int posInitCardToShow;
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
+    private boolean initialValidCard = false;
 
     /**
      * Initializes the controller.
@@ -57,9 +58,23 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
-        Card firstCard = deck.takeCard();
-        table.addCardOnTheTable(firstCard);
-        tableImageView.setImage(firstCard.getImage());
+
+        //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
+        while(!initialValidCard) //mientras que NO sea una carta inicial valida, se repetira...
+        {
+            Card firstCard = deck.takeCard(); //tomamos la carta arriba de la pila
+            if(!firstCard.isSpecial()) //Si NO es especial
+            {
+                initialValidCard = true; //"Desbloqueamos" el ciclo while para que siga el programa
+                table.addCardOnTheTable(firstCard); //ponemos la carta en la table
+                tableImageView.setImage(firstCard.getImage()); //ponemos la IMAGEN de esta
+            }else //si SI es especial
+            {
+                deck.addCardToDeck(firstCard); //llamamos al metodo addCardtodeck (de Clase deck)
+            }
+        }
+        //el resto de codigo se ejecuta ordinariamente...
+
         this.gameUno.startGame();
         printCardsHumanPlayer();
         printCardsMachinePlayer();
