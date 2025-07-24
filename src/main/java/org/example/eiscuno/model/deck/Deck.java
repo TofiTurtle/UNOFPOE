@@ -119,6 +119,9 @@ public class Deck {
         }
         Card auxCard = deckOfCards.pop(); //var temporal auxiliar para ver QUE carta agarra
         System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
+
+        //Verificacion de la cantidad de cartas del mazo
+        System.out.println("CARDS REMAINING: "+ deckOfCards.size());
         return auxCard;
     }
 
@@ -142,4 +145,5 @@ public class Deck {
         deckOfCards.push(card); //lo manda arriba de la pila
         Collections.shuffle(deckOfCards); //lo mezcla
     }
+
 }
