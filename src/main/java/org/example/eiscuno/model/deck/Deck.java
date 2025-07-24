@@ -3,7 +3,9 @@ package org.example.eiscuno.model.deck;
 import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 import org.example.eiscuno.model.card.Card;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Stack;
 
 /**
@@ -146,4 +148,9 @@ public class Deck {
         Collections.shuffle(deckOfCards); //lo mezcla
     }
 
+    public ArrayList<Card> getCards() {
+        ArrayList<Card> deck = new ArrayList<>();
+        deck.addAll(deckOfCards);
+        return deck;
+    }
 }

@@ -10,6 +10,7 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public class ThreadPlayMachine extends Thread {
     private Table table;
@@ -29,54 +30,44 @@ public class ThreadPlayMachine extends Thread {
     }
 
     public void run() {
-        while (true){
-            if(hasPlayerPlayed){
-                // esto lo que hace es desactivar las cartas del jugador para que no pueda seguir poniendo cartas
-                Platform.runLater(() -> {
-                    gameUnoController.gridPaneCardsPlayer.setDisable(true);
-                });
-                try{
+        while (true) {
+            if (hasPlayerPlayed) {
+                // desactivar UI del jugador
+                Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(true));
+                try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
 
-                // ahora obtenemos la carta que se jugo, esto tambien peude ser null
                 Card cardPlayed = putCardOnTheTable();
+                Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
 
-                Platform.runLater(() -> {
-                    gameUnoController.printCardsMachinePlayer();
-                });
-                //si es null entonces arrastramos
                 if (cardPlayed == null) {
                     handleTakeCard();
                 }
-                else {
-                    //hacemos las comprobaciones de si es una carta comodin
-                    if(cardPlayed.isSpecial()) {
-                        Platform.runLater(() -> {
-                            gameUnoController.handleSpecialCard(cardPlayed,gameUnoController.getHumanPlayer());
-                        });
-                        //String wildEffect = gameUnoController.handleWildCard(cardPlayed,gameUnoController.getHumanPlayer());
-                        //if!(wildEffect.equals("SKIP") || wildEffect.equals("WILD") || wildEffect.equals("RESERVE"))) {
-                         //   gameUnoController.buttonDeck.setDisable(false);
-                           // hasPlayerPlayed = false;
-                        //}
-
-                    }
-                    else {
-                        gameUnoController.buttonDeck.setDisable(false);
-                        hasPlayerPlayed = false;
+                else if (cardPlayed.isSpecial()) {
+                    // esperamos a que handleSpecialCard termine de ejecutarse en el FX‐thread
+                    CountDownLatch latch = new CountDownLatch(1);
+                    Platform.runLater(() -> {
+                        gameUnoController.handleSpecialCard(cardPlayed, gameUnoController.getHumanPlayer());
+                        latch.countDown();
+                    });
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
                 }
+                else {
+                    // carta normal → pasa el turno a humano
+                    gameUnoController.buttonDeck.setDisable(false);
+                    hasPlayerPlayed = false;
+                }
 
-                //esto iria con un condicional y pondriamos una alerta o algo asi
-                gameUnoController.gameUno.isGameOver();
-
-                //aqui volvemos a habilitar el mazo de el jugador
-                Platform.runLater(() -> {
-                    gameUnoController.gridPaneCardsPlayer.setDisable(false);
-                });
+                // reactivar UI del jugador
+                Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
+                Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(false));
             }
         }
     }
@@ -137,6 +128,9 @@ public class ThreadPlayMachine extends Thread {
             gameUnoController.buttonDeck.setDisable(false);
             setHasPlayerPlayed(false);
         }
+    }
+    public boolean getHasPlayerPlay() {
+        return this.hasPlayerPlayed;
     }
 
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {

@@ -115,7 +115,6 @@ public class GameUno implements IGameUno {
             cards[i] = this.machinePlayer.getCard( i);
         }
 
-
         return cards;
     }
 
@@ -137,6 +136,7 @@ public class GameUno implements IGameUno {
         }
         return false;
     }
+
 
 
 

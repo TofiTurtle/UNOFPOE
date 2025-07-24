@@ -87,6 +87,32 @@ public class GameUnoController {
 
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
+
+        // Código para dar cartas +2 y +4 a la máquina
+        Card twoWildCard = null;
+        Card fourWildCard = null;
+
+        // Buscar una carta +2 en el mazo
+        for (int i = 0; i < deck.getCards().size(); i++) {
+            Card card = deck.getCards().get(i);
+            if (card.getValue().equals("TWO_WILD") && twoWildCard == null) {
+                twoWildCard = card;
+                break;
+            }
+        }
+
+        // Buscar una carta +4 en el mazo
+        for (int i = 0; i < deck.getCards().size(); i++) {
+            Card card = deck.getCards().get(i);
+            if (card.getValue().equals("FOUR_WILD") && fourWildCard == null) {
+                fourWildCard = card;
+                break;
+            }
+        }
+        System.out.println("Funciono ? "+ twoWildCard.getValue());
+        System.out.println("Funciono ? "+ fourWildCard.getValue());
+        machinePlayer.addCard(twoWildCard);
+        machinePlayer.addCard(fourWildCard);
     }
 
     /**
@@ -269,6 +295,7 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{ //"sino (si lo tiro la machine)"
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "RESERVE":
@@ -277,6 +304,7 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "WILD":
@@ -303,24 +331,28 @@ public class GameUnoController {
                         String color = options.get(index);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
-                        //threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
+                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "TWO_WILD":
                     System.out.println("TWO_WILD USED! +2");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
                         gameUno.eatCard(machinePlayer, 2); //la machin come 2
+                        printCardsMachinePlayer(); //imprimir para que se vea las que comio
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
-                        //threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "FOUR_WILD":
                     System.out.println("FOUR_WILD USED! +4");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
                         gameUno.eatCard(machinePlayer, 4); //la machin come 4
-                        printCardsHumanPlayer();
+                        printCardsMachinePlayer();//imprimir para que se vea las que comio
 
                         //logica para cambiar el color del juego
                         Optional<String> result = dialog.showAndWait();
@@ -334,12 +366,14 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
+                        printCardsHumanPlayer(); //imprimir para que se vea las que comio
                         Random random = new Random();
                         int index = random.nextInt(options.size());
                         String color = options.get(index);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
-                        // threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        threadPlayMachine.setHasPlayerPlayed(false);//el turno ahora es del player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 default:
