@@ -125,7 +125,7 @@ public class Deck {
         System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
 
         //Verificacion de la cantidad de cartas del mazo
-        System.out.println("CARDS REMAINING: "+ deckOfCards.size());
+        System.out.println("CARDS REMAINING ON DECK OF CARDS -> : "+ deckOfCards.size());
         return auxCard;
     }
 
@@ -155,11 +155,29 @@ public class Deck {
         deck.addAll(deckOfCards);
         return deck;
     }
-    //implementacion para evitar el fin del juego
-    public void PushToAuxDeck(Card card) {
-        AuxdeckOfCards.add(card);
-    }
+    //implementacion para evitar el fin del juego: NUEVOS METODOS
+
+    //metodos getter
     public int getAuxDeckSize() {
         return AuxdeckOfCards.size();
     }
+    public int getDeckSize(){
+        return deckOfCards.size();
+    }
+    //este metodo sirve para que la carta (que vendria ser la que SE PONE) se sume a este
+    //maso auxiliar, para que almacene cartas usadas
+    public void PushToAuxDeck(Card card) {
+        AuxdeckOfCards.add(card);
+    }
+    /*Por ultimo, el metodo refill lo que hace es que cuando se llame, va a vaciar TODOU el deck
+    auxiliar, y por cada carta que tire en cada iteracion, se la va a "pasar" al maso principal
+    deckOfcards. Por ultimo, este metodo hace un shuffle para que cuando se rellene el mazo
+    principal, pues las cartas tomen un nuevo orden, y la partida tome un camino mas interesante*/
+    public void RefillCards(){
+        while (!AuxdeckOfCards.isEmpty()) { //mientras que TENGA CONTENIDO
+            deckOfCards.push(AuxdeckOfCards.pop()); //le pasa las cartas al deck principal
+        }
+        Collections.shuffle(deckOfCards); //justo despues de rellenar, re-barajemos esto
+    }
+
 }

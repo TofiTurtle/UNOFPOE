@@ -41,10 +41,6 @@ public class ThreadPlayMachine extends Thread {
                 }
 
                 Card cardPlayed = putCardOnTheTable();
-                //si la maquina pone la carta, entonces no la tiene ni ella ni mazo
-                //entonces, se lo sumamos al auxiliar
-                deck.PushToAuxDeck(cardPlayed);
-                System.out.println("CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
 
                 Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
 
@@ -57,6 +53,9 @@ public class ThreadPlayMachine extends Thread {
                     Platform.runLater(() -> {
                         gameUnoController.handleSpecialCard(cardPlayed, gameUnoController.getHumanPlayer());
                         latch.countDown();
+                        //La maquina aqui PUSO una carta ESPECIAL, como PUSO-> la guardamos en el auxiliar
+                        deck.PushToAuxDeck(cardPlayed);
+                        System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
                     });
                     try {
                         latch.await();
@@ -68,6 +67,9 @@ public class ThreadPlayMachine extends Thread {
                     // carta normal → pasa el turno a humano
                     gameUnoController.buttonDeck.setDisable(false);
                     hasPlayerPlayed = false;
+                    //Aqui la maquina tiro una carta NORMAL, como PUSO-> Guardamos en auxiliar
+                    deck.PushToAuxDeck(cardPlayed);
+                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
                 }
 
                 // reactivar UI del jugador

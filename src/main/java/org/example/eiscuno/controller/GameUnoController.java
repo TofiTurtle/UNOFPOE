@@ -73,7 +73,7 @@ public class GameUnoController {
                 /*En este momento, ya se puso la carta, ya no esta en el deck original
                 por lo que la almacenamos en el deckauxiliar para la implementacion!  */
                 deck.PushToAuxDeck(firstCard); //llamamos al metodo.
-                System.out.println("CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+                System.out.println("carta inicial guardada!! -> CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
             }else //si SI es especial
             {
                 //si se llega aqui, NO se pone la carta, se re-baraja
@@ -128,8 +128,9 @@ public class GameUnoController {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
                     deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
-                    System.out.println("CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
 
                     //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                     //y este pueda seguir tomando cartas
@@ -225,9 +226,21 @@ public class GameUnoController {
          Ahora el jugador llama a su metodo de agregar una carta
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
-        if(deck.isEmpty()) {
-            deactivateEmptyDeck();
-            System.out.println("Mazo vacio");
+
+        /*OJO VIVO, tenemos que colocar esta condicion como que si el mazo llega a tener 5 o menos cartas
+        para hacer el refill, ya que si se deja en cuando quede vacio, si la ultima carta en ser lanzada
+        llega a ser un +2 o +4, te deja viendo un chispero :(
+        el MINIMO de cartas que debe haber para que sea jugable es de 4. */
+        if(deck.getDeckSize()<=4) { //si hay 4 o menos cartas...
+            System.out.println("Mazo vacio ----> RELLENANDO"); //avisamos que se rellena
+            deck.RefillCards(); //llamamos metodo para rellenar!, el resto de codigo sigue igual...xd
+            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+            buttonDeck.setDisable(true);
+            threadPlayMachine.setHasPlayerPlayed(true);
+            printCardsHumanPlayer();
+            //deactivateEmptyDeck(); -->Esto(y su metodo) se puede quitar, pues ya no se nos "bloquea"
+            //si no que se rebaraja haciendo partidas largas.
+
         }
         else {
             humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
