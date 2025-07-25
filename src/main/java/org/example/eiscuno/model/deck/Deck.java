@@ -13,12 +13,14 @@ import java.util.Stack;
  */
 public class Deck {
     private Stack<Card> deckOfCards;
+    private Stack<Card> AuxdeckOfCards;
 
     /**
      * Constructs a new deck of Uno cards and initializes it.
      */
     public Deck() {
         deckOfCards = new Stack<>();
+        AuxdeckOfCards = new Stack<>();
         initializeDeck();
     }
 
@@ -152,5 +154,12 @@ public class Deck {
         ArrayList<Card> deck = new ArrayList<>();
         deck.addAll(deckOfCards);
         return deck;
+    }
+    //implementacion para evitar el fin del juego
+    public void PushToAuxDeck(Card card) {
+        AuxdeckOfCards.add(card);
+    }
+    public int getAuxDeckSize() {
+        return AuxdeckOfCards.size();
     }
 }

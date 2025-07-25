@@ -70,8 +70,13 @@ public class GameUnoController {
                 initialValidCard = true; //"Desbloqueamos" el ciclo while para que siga el programa
                 table.addCardOnTheTable(firstCard); //ponemos la carta en la table
                 tableImageView.setImage(firstCard.getImage()); //ponemos la IMAGEN de esta
+                /*En este momento, ya se puso la carta, ya no esta en el deck original
+                por lo que la almacenamos en el deckauxiliar para la implementacion!  */
+                deck.PushToAuxDeck(firstCard); //llamamos al metodo.
+                System.out.println("CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
             }else //si SI es especial
             {
+                //si se llega aqui, NO se pone la carta, se re-baraja
                 deck.addCardToDeck(firstCard); //llamamos al metodo addCardtodeck (de Clase deck)
             }
         }
@@ -88,31 +93,7 @@ public class GameUnoController {
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
 
-        // Código para dar cartas +2 y +4 a la máquina
-        Card twoWildCard = null;
-        Card fourWildCard = null;
 
-        // Buscar una carta +2 en el mazo
-        for (int i = 0; i < deck.getCards().size(); i++) {
-            Card card = deck.getCards().get(i);
-            if (card.getValue().equals("TWO_WILD") && twoWildCard == null) {
-                twoWildCard = card;
-                break;
-            }
-        }
-
-        // Buscar una carta +4 en el mazo
-        for (int i = 0; i < deck.getCards().size(); i++) {
-            Card card = deck.getCards().get(i);
-            if (card.getValue().equals("FOUR_WILD") && fourWildCard == null) {
-                fourWildCard = card;
-                break;
-            }
-        }
-        System.out.println("Funciono ? "+ twoWildCard.getValue());
-        System.out.println("Funciono ? "+ fourWildCard.getValue());
-        machinePlayer.addCard(twoWildCard);
-        machinePlayer.addCard(fourWildCard);
     }
 
     /**
@@ -147,6 +128,9 @@ public class GameUnoController {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
+                    System.out.println("CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+
                     //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                     //y este pueda seguir tomando cartas
                     if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
@@ -246,7 +230,7 @@ public class GameUnoController {
             System.out.println("Mazo vacio");
         }
         else {
-            humanPlayer.addCard(deck.takeCard());
+            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
             buttonDeck.setDisable(true);
             threadPlayMachine.setHasPlayerPlayed(true);
             printCardsHumanPlayer();

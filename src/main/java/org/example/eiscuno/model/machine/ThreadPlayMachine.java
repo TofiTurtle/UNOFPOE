@@ -41,6 +41,11 @@ public class ThreadPlayMachine extends Thread {
                 }
 
                 Card cardPlayed = putCardOnTheTable();
+                //si la maquina pone la carta, entonces no la tiene ni ella ni mazo
+                //entonces, se lo sumamos al auxiliar
+                deck.PushToAuxDeck(cardPlayed);
+                System.out.println("CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+
                 Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
 
                 if (cardPlayed == null) {
