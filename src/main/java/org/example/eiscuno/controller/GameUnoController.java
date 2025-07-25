@@ -2,7 +2,9 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -16,7 +18,7 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Controller class for the Uno game.
@@ -50,6 +52,7 @@ public class GameUnoController {
     private int posInitCardToShow;
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
+    private boolean initialValidCard = false;
 
     /**
      * Initializes the controller.
@@ -57,9 +60,28 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
-        Card firstCard = deck.takeCard();
-        table.addCardOnTheTable(firstCard);
-        tableImageView.setImage(firstCard.getImage());
+
+        //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
+        while(!initialValidCard) //mientras que NO sea una carta inicial valida, se repetira...
+        {
+            Card firstCard = deck.takeCard(); //tomamos la carta arriba de la pila
+            if(!firstCard.isSpecial()) //Si NO es especial
+            {
+                initialValidCard = true; //"Desbloqueamos" el ciclo while para que siga el programa
+                table.addCardOnTheTable(firstCard); //ponemos la carta en la table
+                tableImageView.setImage(firstCard.getImage()); //ponemos la IMAGEN de esta
+                /*En este momento, ya se puso la carta, ya no esta en el deck original
+                por lo que la almacenamos en el deckauxiliar para la implementacion!  */
+                deck.PushToAuxDeck(firstCard); //llamamos al metodo.
+                System.out.println("carta inicial guardada!! -> CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+            }else //si SI es especial
+            {
+                //si se llega aqui, NO se pone la carta, se re-baraja
+                deck.addCardToDeck(firstCard); //llamamos al metodo addCardtodeck (de Clase deck)
+            }
+        }
+        //el resto de codigo se ejecuta ordinariamente...
+
         this.gameUno.startGame();
         printCardsHumanPlayer();
         printCardsMachinePlayer();
@@ -70,6 +92,8 @@ public class GameUnoController {
 
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
+
+
     }
 
     /**
@@ -104,6 +128,10 @@ public class GameUnoController {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
+                    deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
+                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+
                     //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                     //y este pueda seguir tomando cartas
                     if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
@@ -111,8 +139,6 @@ public class GameUnoController {
                     }else{
                         buttonDeck.setDisable(true);
                     }
-
-
 
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
@@ -126,6 +152,8 @@ public class GameUnoController {
                     }
                     printCardsHumanPlayer();
 
+                    //esto iria con un condicional y pondriamos una alerta o algo asi
+                    gameUno.isGameOver();
 
 
                 }
@@ -198,10 +226,29 @@ public class GameUnoController {
          Ahora el jugador llama a su metodo de agregar una carta
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
-        humanPlayer.addCard(deck.takeCard());
-        buttonDeck.setDisable(true);
-        threadPlayMachine.setHasPlayerPlayed(true);
-        printCardsHumanPlayer();
+
+        /*OJO VIVO, tenemos que colocar esta condicion como que si el mazo llega a tener 5 o menos cartas
+        para hacer el refill, ya que si se deja en cuando quede vacio, si la ultima carta en ser lanzada
+        llega a ser un +2 o +4, te deja viendo un chispero :(
+        el MINIMO de cartas que debe haber para que sea jugable es de 4. */
+        if(deck.getDeckSize()<=4) { //si hay 4 o menos cartas...
+            System.out.println("Mazo vacio ----> RELLENANDO"); //avisamos que se rellena
+            deck.RefillCards(); //llamamos metodo para rellenar!, el resto de codigo sigue igual...xd
+            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+            buttonDeck.setDisable(true);
+            threadPlayMachine.setHasPlayerPlayed(true);
+            printCardsHumanPlayer();
+            //deactivateEmptyDeck(); -->Esto(y su metodo) se puede quitar, pues ya no se nos "bloquea"
+            //si no que se rebaraja haciendo partidas largas.
+
+        }
+        else {
+            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+            buttonDeck.setDisable(true);
+            threadPlayMachine.setHasPlayerPlayed(true);
+            printCardsHumanPlayer();
+        }
+
     }
 
     /**
@@ -230,6 +277,12 @@ public class GameUnoController {
     *
     * */
     public void handleSpecialCard(Card card, Player targetPlayer) {
+        List<String> options = Arrays.asList("Rojo", "Verde", "Azul","Amarillo");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("Rojo", options);
+        dialog.setTitle("Seleccionar color");
+        dialog.setHeaderText("Escoge un color");
+        dialog.setContentText("Colores disponibles:");
+
 
         switch (card.getValue())
         {
@@ -239,6 +292,7 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{ //"sino (si lo tiro la machine)"
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "RESERVE":
@@ -247,6 +301,7 @@ public class GameUnoController {
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "WILD":
@@ -257,29 +312,68 @@ public class GameUnoController {
                     * */
                     System.out.println("WILD USED!");
                     if (targetPlayer == machinePlayer) {
-                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno igual al jugador
+                        printCardsHumanPlayer();
+
+                        //logica para cambiar el color del juego
+                        Optional<String> result = dialog.showAndWait();
+                        result.ifPresent(color -> {
+                            System.out.println("Color seleccionado: " + color);
+                            //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
+                            card.setColor(translateColor(color));
+                        });
+                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno a la maquina
                     }else{
-                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno a la maquina
+                        Random random = new Random();
+                        int index = random.nextInt(options.size());
+                        String color = options.get(index);
+                        card.setColor(translateColor(color));
+                        System.out.println("Color escogido: " + color);
+                        buttonDeck.setDisable(false);
+                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "TWO_WILD":
                     System.out.println("TWO_WILD USED! +2");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
                         gameUno.eatCard(machinePlayer, 2); //la machin come 2
+                        printCardsMachinePlayer(); //imprimir para que se vea las que comio
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
+                        printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "FOUR_WILD":
                     System.out.println("FOUR_WILD USED! +4");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
                         gameUno.eatCard(machinePlayer, 4); //la machin come 4
+                        printCardsMachinePlayer();//imprimir para que se vea las que comio
+
+                        //logica para cambiar el color del juego
+                        Optional<String> result = dialog.showAndWait();
+                        result.ifPresent(color -> {
+                            System.out.println("Color seleccionado: " + color);
+                            color = translateColor(color);
+                            //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
+                            card.setColor(color);
+                        });
+
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
-                        threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
+                        printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        Random random = new Random();
+                        int index = random.nextInt(options.size());
+                        String color = options.get(index);
+                        card.setColor(translateColor(color));
+                        System.out.println("Color escogido: " + color);
+                        buttonDeck.setDisable(false);
+                        threadPlayMachine.setHasPlayerPlayed(false);//el turno ahora es del player
+                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 default:
@@ -288,7 +382,11 @@ public class GameUnoController {
             }
     }
 
-    
+    public void deactivateEmptyDeck() {
+        if(deck.isEmpty()) {
+            buttonDeck.setDisable(true);
+        }
+    }
 
     @FXML
     void onHandleExit(ActionEvent event) {
@@ -302,6 +400,16 @@ public class GameUnoController {
 
     public Player getHumanPlayer() {
         return humanPlayer;
+    }
+
+    public String translateColor(String toTranslate) {
+        return switch (toTranslate) {
+            case "Amarillo" -> "YELLOW";
+            case "Azul" -> "BLUE";
+            case "Rojo" -> "RED";
+            case "Verde" -> "GREEN";
+            default -> null;
+        };
     }
 
 }

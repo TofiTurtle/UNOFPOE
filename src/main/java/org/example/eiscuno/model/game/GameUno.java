@@ -115,7 +115,6 @@ public class GameUno implements IGameUno {
             cards[i] = this.machinePlayer.getCard( i);
         }
 
-
         return cards;
     }
 
@@ -127,6 +126,19 @@ public class GameUno implements IGameUno {
      */
     @Override
     public Boolean isGameOver() {
-        return null;
+        if(machinePlayer.getCardsPlayer().isEmpty()) {
+            System.out.println("Gano la maquina");
+            return true;
+        }
+        else if(humanPlayer.getCardsPlayer().isEmpty()) {
+            System.out.println("Gano el humano");
+            return true;
+        }
+        return false;
     }
+
+
+
+
+
 }

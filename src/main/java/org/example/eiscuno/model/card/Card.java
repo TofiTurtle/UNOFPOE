@@ -66,7 +66,9 @@ public class Card {
         return image;
     }
 
-
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public String getValue() {
         return value;

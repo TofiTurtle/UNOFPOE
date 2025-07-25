@@ -3,7 +3,9 @@ package org.example.eiscuno.model.deck;
 import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 import org.example.eiscuno.model.card.Card;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Stack;
 
 /**
@@ -11,12 +13,14 @@ import java.util.Stack;
  */
 public class Deck {
     private Stack<Card> deckOfCards;
+    private Stack<Card> AuxdeckOfCards;
 
     /**
      * Constructs a new deck of Uno cards and initializes it.
      */
     public Deck() {
         deckOfCards = new Stack<>();
+        AuxdeckOfCards = new Stack<>();
         initializeDeck();
     }
 
@@ -119,6 +123,9 @@ public class Deck {
         }
         Card auxCard = deckOfCards.pop(); //var temporal auxiliar para ver QUE carta agarra
         System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
+
+        //Verificacion de la cantidad de cartas del mazo
+        System.out.println("CARDS REMAINING ON DECK OF CARDS -> : "+ deckOfCards.size());
         return auxCard;
     }
 
@@ -130,4 +137,47 @@ public class Deck {
     public boolean isEmpty() {
         return deckOfCards.isEmpty();
     }
+
+    /*Nuevo metodo addCardToDeck se crea para prevenir que la carta inicial sea una carta especial
+    Lo que este hace es: lo llamamos cuando detectamos que se tiene una carta especial, entonces
+    lo que el hace es tomar la carta y pushearla en el mazo de nuevo. (quedando en la parte superior
+    de la pila). Por lo que, para no quedar en un bucle infinito, sencillamente re-barajamos el mazo
+    una vez mas.
+    ->al estar esto dentro del do while, se hace hasta que la carta inicial sea valida!
+     */
+    public void addCardToDeck (Card card) {
+        deckOfCards.push(card); //lo manda arriba de la pila
+        Collections.shuffle(deckOfCards); //lo mezcla
+    }
+
+    public ArrayList<Card> getCards() {
+        ArrayList<Card> deck = new ArrayList<>();
+        deck.addAll(deckOfCards);
+        return deck;
+    }
+    //implementacion para evitar el fin del juego: NUEVOS METODOS
+
+    //metodos getter
+    public int getAuxDeckSize() {
+        return AuxdeckOfCards.size();
+    }
+    public int getDeckSize(){
+        return deckOfCards.size();
+    }
+    //este metodo sirve para que la carta (que vendria ser la que SE PONE) se sume a este
+    //maso auxiliar, para que almacene cartas usadas
+    public void PushToAuxDeck(Card card) {
+        AuxdeckOfCards.add(card);
+    }
+    /*Por ultimo, el metodo refill lo que hace es que cuando se llame, va a vaciar TODOU el deck
+    auxiliar, y por cada carta que tire en cada iteracion, se la va a "pasar" al maso principal
+    deckOfcards. Por ultimo, este metodo hace un shuffle para que cuando se rellene el mazo
+    principal, pues las cartas tomen un nuevo orden, y la partida tome un camino mas interesante*/
+    public void RefillCards(){
+        while (!AuxdeckOfCards.isEmpty()) { //mientras que TENGA CONTENIDO
+            deckOfCards.push(AuxdeckOfCards.pop()); //le pasa las cartas al deck principal
+        }
+        Collections.shuffle(deckOfCards); //justo despues de rellenar, re-barajemos esto
+    }
+
 }
