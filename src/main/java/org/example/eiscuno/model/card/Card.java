@@ -85,4 +85,6 @@ public class Card {
     public boolean isSpecial() {
         return this.getValue().startsWith("SKIP") || this.getValue().startsWith("WILD") || this.getValue().startsWith("TWO_WILD") || this.getValue().startsWith("FOUR_WILD") || this.getValue().startsWith("RESERVE");
     }
+
+
 }
