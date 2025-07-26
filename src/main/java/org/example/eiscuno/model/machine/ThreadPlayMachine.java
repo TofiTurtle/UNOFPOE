@@ -130,8 +130,13 @@ public class ThreadPlayMachine extends Thread {
         }
         else {
             machinePlayer.addCard(deck.takeCard());
-            //activar el boton para que el jugador pueda arrastrar
-            gameUnoController.buttonDeck.setDisable(false);
+
+            //Actualizar visualmente las cartas de la máquina
+            Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
+
+            //Activar el botón para que el jugador pueda arrastrar
+            Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
+
             setHasPlayerPlayed(false);
         }
     }

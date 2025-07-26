@@ -30,39 +30,18 @@ public class ThreadSingUNOMachine implements Runnable{
     }
 
     /**
-     * Este metodo lo llama un hilo en segundo plano para verificar si el jugador tiene
-     * exactamente una carta y no ha dicho UNO, y en ese caso penalizarlo si no fue más rápido que la máquina.
+     * Esto realmente se puede borrar, no se porque lo deje aqui xd
      */
     private void hasOneCardTheHumanPlayer() {
-        // Verifica si el jugador tiene exactamente una carta,
-        // no ha dicho UNO, y ya está activo el chequeo
-        if (cardsPlayer.size() == 1 && gameUnoController.unoCheckStarted &&
-                !gameUnoController.playerSaidUNO && !alreadyNotified) {
+        if (cardsPlayer.size() == 1 &&
+                gameUnoController.unoCheckStarted &&
+                !gameUnoController.playerSaidUNO &&
+                !alreadyNotified) {
 
             alreadyNotified = true;
-
-            Platform.runLater(() -> {
-                System.out.println("La máquina acusó al jugador por no decir UNO.");
-
-                // Penaliza al jugador
-                gameUnoController.humanPlayer.addCard(gameUnoController.deck.takeCard());
-                gameUnoController.printCardsHumanPlayer();
-
-                // Muestra alerta
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("¡No dijiste UNO!");
-                alert.setHeaderText(null);
-                alert.setContentText("La máquina te acusó por no decir UNO. Se te agregó una carta.");
-                alert.showAndWait();
-
-                // Reinicia banderas
-                gameUnoController.playerSaidUNO = false;
-                gameUnoController.unoCheckStarted = false;
-                alreadyNotified = false;
-            });
         }
 
-        // Si vuelve a tener más de una carta, reinicia la posibilidad de acusar
+        // Reinicia cuando ya no hay solo una carta
         if (cardsPlayer.size() != 1) {
             alreadyNotified = false;
         }

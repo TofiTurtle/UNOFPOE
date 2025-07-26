@@ -377,6 +377,9 @@ public class GameUnoController {
             //Penalizamos a la máquina
             machinePlayer.addCard(deck.takeCard());
 
+            //Actualiza la vista de la maquina de inmediato
+            printCardsMachinePlayer();
+
             //Reiniciamos banderas de vigilancia de UNO
             unoCheckMachineStarted = false;
             machineSaidUNO = false;
