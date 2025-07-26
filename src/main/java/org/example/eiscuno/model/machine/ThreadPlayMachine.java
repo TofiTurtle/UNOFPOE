@@ -41,6 +41,7 @@ public class ThreadPlayMachine extends Thread {
                 }
 
                 Card cardPlayed = putCardOnTheTable();
+
                 Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
 
                 if (cardPlayed == null) {
@@ -52,6 +53,9 @@ public class ThreadPlayMachine extends Thread {
                     Platform.runLater(() -> {
                         gameUnoController.handleSpecialCard(cardPlayed, gameUnoController.getHumanPlayer());
                         latch.countDown();
+                        //La maquina aqui PUSO una carta ESPECIAL, como PUSO-> la guardamos en el auxiliar
+                        deck.PushToAuxDeck(cardPlayed);
+                        System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
                     });
                     try {
                         latch.await();
@@ -63,6 +67,9 @@ public class ThreadPlayMachine extends Thread {
                     // carta normal → pasa el turno a humano
                     gameUnoController.buttonDeck.setDisable(false);
                     hasPlayerPlayed = false;
+                    //Aqui la maquina tiro una carta NORMAL, como PUSO-> Guardamos en auxiliar
+                    deck.PushToAuxDeck(cardPlayed);
+                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
                 }
 
                 // reactivar UI del jugador
@@ -123,8 +130,13 @@ public class ThreadPlayMachine extends Thread {
         }
         else {
             machinePlayer.addCard(deck.takeCard());
-            //activar el boton para que el jugador pueda arrastrar
-            gameUnoController.buttonDeck.setDisable(false);
+
+            //Actualizar visualmente las cartas de la máquina
+            Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
+
+            //Activar el botón para que el jugador pueda arrastrar
+            Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
+
             setHasPlayerPlayed(false);
         }
     }

@@ -1,5 +1,6 @@
 package org.example.eiscuno.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -44,15 +45,21 @@ public class GameUnoController {
     private Button buttonUNO;
 
 
-    private Player humanPlayer;
+    public Player humanPlayer;
     private Player machinePlayer;
-    private Deck deck;
+    public Deck deck;
     private Table table;
     public GameUno gameUno;
     private int posInitCardToShow;
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
     private boolean initialValidCard = false;
+    public boolean playerSaidUNO = false;
+    public boolean machineSaidUNO = false;
+    public boolean unoCheckMachineStarted = false;
+    public boolean unoCheckStarted = false;
+
+
 
     /**
      * Initializes the controller.
@@ -70,8 +77,13 @@ public class GameUnoController {
                 initialValidCard = true; //"Desbloqueamos" el ciclo while para que siga el programa
                 table.addCardOnTheTable(firstCard); //ponemos la carta en la table
                 tableImageView.setImage(firstCard.getImage()); //ponemos la IMAGEN de esta
+                /*En este momento, ya se puso la carta, ya no esta en el deck original
+                por lo que la almacenamos en el deckauxiliar para la implementacion!  */
+                deck.PushToAuxDeck(firstCard); //llamamos al metodo.
+                System.out.println("carta inicial guardada!! -> CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
             }else //si SI es especial
             {
+                //si se llega aqui, NO se pone la carta, se re-baraja
                 deck.addCardToDeck(firstCard); //llamamos al metodo addCardtodeck (de Clase deck)
             }
         }
@@ -81,38 +93,14 @@ public class GameUnoController {
         printCardsHumanPlayer();
         printCardsMachinePlayer();
 
-        threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
+        threadSingUNOMachine = new ThreadSingUNOMachine(humanPlayer.getCardsPlayer(), this);
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
         threadPlayMachine.start();
 
-        // Código para dar cartas +2 y +4 a la máquina
-        Card twoWildCard = null;
-        Card fourWildCard = null;
 
-        // Buscar una carta +2 en el mazo
-        for (int i = 0; i < deck.getCards().size(); i++) {
-            Card card = deck.getCards().get(i);
-            if (card.getValue().equals("TWO_WILD") && twoWildCard == null) {
-                twoWildCard = card;
-                break;
-            }
-        }
-
-        // Buscar una carta +4 en el mazo
-        for (int i = 0; i < deck.getCards().size(); i++) {
-            Card card = deck.getCards().get(i);
-            if (card.getValue().equals("FOUR_WILD") && fourWildCard == null) {
-                fourWildCard = card;
-                break;
-            }
-        }
-        System.out.println("Funciono ? "+ twoWildCard.getValue());
-        System.out.println("Funciono ? "+ fourWildCard.getValue());
-        machinePlayer.addCard(twoWildCard);
-        machinePlayer.addCard(fourWildCard);
     }
 
     /**
@@ -131,7 +119,7 @@ public class GameUnoController {
     /**
      * Prints the human player's cards on the grid pane.
      */
-    private void printCardsHumanPlayer() {
+    public void printCardsHumanPlayer() {
         this.gridPaneCardsPlayer.getChildren().clear();
         Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);
 
@@ -147,6 +135,16 @@ public class GameUnoController {
                     // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
+                    deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
+                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+
+                    //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
+                    if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
+                        unoCheckStarted = true; //Evita que se lance mas de una vez
+                        checkUNO("PLAYER"); //Simula que la maquina espera a ver si el jugador dice uno
+                    }
+
                     //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                     //y este pueda seguir tomando cartas
                     if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
@@ -170,13 +168,93 @@ public class GameUnoController {
                     //esto iria con un condicional y pondriamos una alerta o algo asi
                     gameUno.isGameOver();
 
-
                 }
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
     }
+
+    /**
+     * Este metodo verifica quién dice "UNO" primero: el jugador o la máquina.
+     * Dependiendo del parámetro "who", maneja los dos casos:
+     * - Si es "PLAYER", se espera que el jugador diga UNO antes que la máquina.
+     * - Si es "MACHINE", se espera que el jugador acuse a la máquina antes de que ella lo diga.
+     *
+     *  @param who Cadena que representa quién tiene una carta. Puede ser "PLAYER" o "MACHINE".
+     *  */
+    private void checkUNO(String who) {
+
+        //Primer caso: Es el jugador quien tiene solo una carta
+        if (who.equals("PLAYER")) {
+            unoCheckStarted = true;//Se activa la bandera que indica que ya estamos revisando si el jugador dice UNO
+            System.out.println("El jugador tiene solo una carta, esperando quién dice UNO primero...");
+
+            new Thread(() -> { //Creamos un nuevo hilo para no bloquear la interfaz gráfica
+                try {
+                    //Esperamos entre 1 y 3 segundos (simula el tiempo que tarda la máquina en decir UNO)
+                    int delay = 1000 + new Random().nextInt(2000);
+                    Thread.sleep(delay);
+
+                    //Si el jugador NO dijo UNO en ese tiempo, es penalizado
+                    if (!playerSaidUNO) {
+                        System.out.println("La máquina dijo UNO primero. El jugador será penalizado.");
+
+                        // Volvemos al hilo de la interfaz para modificar componentes visuales
+                        Platform.runLater(() -> {
+                            humanPlayer.addCard(deck.takeCard()); // El jugador recibe una carta de penalización
+                            printCardsHumanPlayer(); // Actualizamos visualmente las cartas del jugador
+
+                            // Mostramos una alerta informando la penalización
+                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("UNO");
+                            alert.setHeaderText("¡La máquina dijo UNO primero!");
+                            alert.setContentText("Has sido penalizado con una carta.");
+                            alert.showAndWait();
+                        });
+                    } else {
+                        // Si el jugador dijo UNO a tiempo, no pasa nada
+                        System.out.println("El jugador dijo UNO a tiempo.");
+                    }
+
+                    // Reiniciamos las banderas para que pueda volver a usarse el sistema
+                    playerSaidUNO = false;
+                    unoCheckStarted = false;
+
+                } catch (InterruptedException e) {
+                    // Capturamos cualquier interrupción del hilo
+                    e.printStackTrace();
+                }
+            }).start();
+
+            //Segundo caso: Es la máquina quien tiene una sola carta
+        } else if (who.equals("MACHINE")) {
+            unoCheckMachineStarted = true; //Activamos la bandera de que estamos esperando si la máquina dice UNO
+            System.out.println("La máquina tiene solo una carta. Esperando si el jugador le canta...");
+
+            new Thread(() -> { //También usamos un hilo para no bloquear la interfaz
+                try {
+                    //Tiempo de reacción de la máquina (simula que ella va a decir UNO)
+                    int delay = 1000 + new Random().nextInt(2000);
+                    Thread.sleep(delay);
+
+                    //Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
+                    if (!machineSaidUNO) {
+                        machineSaidUNO = true; //La máquina se salva diciendo UNO
+                        System.out.println("La máquina dijo UNO a tiempo.");
+                    }
+
+                    //Terminamos el proceso
+                    unoCheckMachineStarted = false;
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+    }
+
+
 
     public void printCardsMachinePlayer() {
         this.gridPaneCardsMachine.getChildren().clear();
@@ -186,6 +264,18 @@ public class GameUnoController {
             Card card = currentVisibleCardsMachinePlayer[i];
             ImageView cardImageView = card.createCardImageViewBack();
             this.gridPaneCardsMachine.add(cardImageView, i, 0);
+        }
+
+        // Si la máquina ya no tiene solo una carta, reiniciamos las banderas UNO
+        if (machinePlayer.getCardsPlayer().size() != 1) {
+            unoCheckMachineStarted = false;
+            machineSaidUNO = false;
+        }
+
+        //Si a la maquina le queda EXACTAMENTE una carta, empieza la vigilancia del uno
+        if (machinePlayer.getCardsPlayer().size() == 1 && !unoCheckMachineStarted) {
+            unoCheckMachineStarted = true; //Evita que se lance mas de una vez
+            checkUNO("MACHINE"); //Simula que el jugador espera a ver si la maquina dice uno
         }
     }
 
@@ -241,12 +331,24 @@ public class GameUnoController {
          Ahora el jugador llama a su metodo de agregar una carta
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
-        if(deck.isEmpty()) {
-            deactivateEmptyDeck();
-            System.out.println("Mazo vacio");
+
+        /*OJO VIVO, tenemos que colocar esta condicion como que si el mazo llega a tener 5 o menos cartas
+        para hacer el refill, ya que si se deja en cuando quede vacio, si la ultima carta en ser lanzada
+        llega a ser un +2 o +4, te deja viendo un chispero :(
+        el MINIMO de cartas que debe haber para que sea jugable es de 4. */
+        if(deck.getDeckSize()<=4) { //si hay 4 o menos cartas...
+            System.out.println("Mazo vacio ----> RELLENANDO"); //avisamos que se rellena
+            deck.RefillCards(); //llamamos metodo para rellenar!, el resto de codigo sigue igual...xd
+            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+            buttonDeck.setDisable(true);
+            threadPlayMachine.setHasPlayerPlayed(true);
+            printCardsHumanPlayer();
+            //deactivateEmptyDeck(); -->Esto(y su metodo) se puede quitar, pues ya no se nos "bloquea"
+            //si no que se rebaraja haciendo partidas largas.
+
         }
         else {
-            humanPlayer.addCard(deck.takeCard());
+            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
             buttonDeck.setDisable(true);
             threadPlayMachine.setHasPlayerPlayed(true);
             printCardsHumanPlayer();
@@ -259,9 +361,43 @@ public class GameUnoController {
      *
      * @param event the action event
      */
+    //Metodo que cubre al momento de presionar "uno" cuando la maquina tiene una carta y cuando el jugador tiene una carta
+    //Siendo el primer caso el jugador teniendo una sola carta y segundo caso la maquina teniendo una sola carta, y el caso invalido donde no se puede decir uno
     @FXML
     void onHandleUno(ActionEvent event) {
-        // Implement logic to handle Uno event here
+        //Primer caso: El jugador tiene una sola carta y está en verificación de UNO
+        if (humanPlayer.getCardsPlayer().size() == 1 && unoCheckStarted) {
+            playerSaidUNO = true; //Se registra que el jugador sí dijo UNO
+            System.out.println("El jugador presionó el botón UNO a tiempo.");
+
+            //Segundo caso: El jugador intenta acusar a la máquina cuando esta tiene una sola carta
+        } else if (machinePlayer.getCardsPlayer().size() == 1 && unoCheckMachineStarted && !machineSaidUNO) {
+            System.out.println("El jugador acusó a la máquina por no decir UNO a tiempo.");
+
+            //Penalizamos a la máquina
+            machinePlayer.addCard(deck.takeCard());
+
+            //Actualiza la vista de la maquina de inmediato
+            printCardsMachinePlayer();
+
+            //Reiniciamos banderas de vigilancia de UNO
+            unoCheckMachineStarted = false;
+            machineSaidUNO = false;
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("UNO");
+            alert.setHeaderText("¡Acusación exitosa!");
+            alert.setContentText("La máquina no dijo UNO a tiempo y ha sido penalizada.");
+            alert.showAndWait();
+
+            //Caso inválido: el jugador no puede decir UNO
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("UNO");
+            alert.setHeaderText("No puedes decir UNO ahora");
+            alert.setContentText("Solo puedes decir UNO cuando te queda una sola carta, o acusar a la máquina si ella no ha dicho UNO.");
+            alert.showAndWait();
+        }
     }
 
     public int getPosInitCardToShow() {
