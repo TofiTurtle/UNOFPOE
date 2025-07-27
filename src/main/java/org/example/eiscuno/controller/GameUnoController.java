@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import org.example.eiscuno.exceptions.PenaltyException;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -18,7 +19,7 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
-
+import org.example.eiscuno.exceptions.PenaltyException;
 import java.util.*;
 
 /**
@@ -198,20 +199,24 @@ public class GameUnoController {
 
                     //Si el jugador NO dijo UNO en ese tiempo, es penalizado
                     if (!playerSaidUNO) {
-                        System.out.println("La máquina dijo UNO primero. El jugador será penalizado.");
+                        try {
+                            //Excepcion marcada
+                            throw new PenaltyException("El jugador no dijo UNO a tiempo.", "PLAYER");
+                        } catch (PenaltyException e) {
 
-                        // Volvemos al hilo de la interfaz para modificar componentes visuales
-                        Platform.runLater(() -> {
-                            humanPlayer.addCard(deck.takeCard()); // El jugador recibe una carta de penalización
-                            printCardsHumanPlayer(); // Actualizamos visualmente las cartas del jugador
+                            // Volvemos al hilo de la interfaz para modificar componentes visuales
+                            Platform.runLater(() -> {
+                                humanPlayer.addCard(deck.takeCard()); // El jugador recibe una carta de penalización
+                                printCardsHumanPlayer(); // Actualizamos visualmente las cartas del jugador
 
-                            // Mostramos una alerta informando la penalización
-                            Alert alert = new Alert(Alert.AlertType.WARNING);
-                            alert.setTitle("UNO");
-                            alert.setHeaderText("¡La máquina dijo UNO primero!");
-                            alert.setContentText("Has sido penalizado con una carta.");
-                            alert.showAndWait();
-                        });
+                                // Mostramos una alerta informando la penalización
+                                Alert alert = new Alert(Alert.AlertType.WARNING);
+                                alert.setTitle("UNO");
+                                alert.setHeaderText("¡La máquina dijo UNO primero!");
+                                alert.setContentText("Has sido penalizado con una carta.");
+                                alert.showAndWait();
+                            });
+                        }
                     } else {
                         // Si el jugador dijo UNO a tiempo, no pasa nada
                         System.out.println("El jugador dijo UNO a tiempo.");
@@ -238,13 +243,28 @@ public class GameUnoController {
                     int delay = 1000 + new Random().nextInt(2000);
                     Thread.sleep(delay);
 
-                    //Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
+                    // Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
                     if (!machineSaidUNO) {
-                        machineSaidUNO = true; //La máquina se salva diciendo UNO
+                        machineSaidUNO = true;
                         System.out.println("La máquina dijo UNO a tiempo.");
+                    } else {
+                        try {
+                            throw new PenaltyException("La máquina no dijo UNO a tiempo.", "MACHINE");
+                        } catch (PenaltyException e) {
+                            Platform.runLater(() -> {
+                                if (e.getPenalizedEntity().equals("MACHINE")) {
+                                    machinePlayer.addCard(deck.takeCard());
+
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Penalización a la Máquina");
+                                    alert.setHeaderText("¡Le cantaste UNO primero a la máquina!");
+                                    alert.setContentText("La máquina fue penalizada con una carta.");
+                                    alert.showAndWait();
+                                }
+                            });
+                        }
                     }
 
-                    //Terminamos el proceso
                     unoCheckMachineStarted = false;
 
                 } catch (InterruptedException e) {
@@ -252,6 +272,7 @@ public class GameUnoController {
                 }
             }).start();
         }
+
     }
 
 
@@ -550,5 +571,4 @@ public class GameUnoController {
             default -> null;
         };
     }
-
 }

@@ -5,10 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/exceptions/PenaltyException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/machine/ThreadPlayMachine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/machine/ThreadPlayMachine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/machine/ThreadSingUNOMachine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/machine/ThreadSingUNOMachine.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +22,7 @@
         <option value="Interface" />
         <option value="Enum" />
         <option value="Class" />
+        <option value="Exception" />
       </list>
     </option>
   </component>
@@ -162,7 +162,9 @@
       <workItem from="1753225735017" duration="5652000" />
       <workItem from="1753414258640" duration="6809000" />
       <workItem from="1753471281997" duration="11213000" />
-      <workItem from="1753556082778" duration="3999000" />
+      <workItem from="1753556082778" duration="4590000" />
+      <workItem from="1753648475789" duration="869000" />
+      <workItem from="1753655879092" duration="2247000" />
     </task>
     <servers />
   </component>
