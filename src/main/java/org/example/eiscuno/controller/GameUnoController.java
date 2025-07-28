@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -33,6 +34,9 @@ import java.util.*;
  * Controller class for the Uno game.
  */
 public class GameUnoController {
+
+    @FXML
+    private Label labelAlertMachine;
 
     @FXML
     private StackPane stackPaneCardsMachine;
@@ -74,6 +78,7 @@ public class GameUnoController {
      */
     @FXML
     public void initialize() {
+        labelAlertMachine.setText("");
         initVariables();
 
         //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
@@ -159,6 +164,7 @@ public class GameUnoController {
             * Aqui es donde Player Juega una carta
             * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
+                labelAlertMachine.setText("");
                 if(table.isValidPlay(card) ) {
                     //ANIMACION---------
                     // 1. Crear duplicado de la carta para animación
@@ -404,7 +410,7 @@ public class GameUnoController {
          Ahora el jugador llama a su metodo de agregar una carta
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
-
+        labelAlertMachine.setText(""); //limpio el label
         /*OJO VIVO, tenemos que colocar esta condicion como que si el mazo llega a tener 5 o menos cartas
         para hacer el refill, ya que si se deja en cuando quede vacio, si la ultima carta en ser lanzada
         llega a ser un +2 o +4, te deja viendo un chispero :(
@@ -503,6 +509,7 @@ public class GameUnoController {
                     if (targetPlayer == machinePlayer) { //"si lo tiro el jugador"
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{ //"sino (si lo tiro la machine)"
+                        labelAlertMachine.setText("La maquina vuelve a tirar");
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
@@ -512,16 +519,15 @@ public class GameUnoController {
                     if (targetPlayer == machinePlayer) {
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{
+                        labelAlertMachine.setText("La maquina vuelve a tirar");
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "WILD":
-                    /*Aqui hace falta hacer una implementacion de crear un menu interactivo para
-                    escoger el color que se escoge con la carta WILD.
-                    De momento solo "pasa" el turno", no tiene efecto alguno, solo que se puede tirar en
-                    cualquier momento.
-                    * */
+                    /*
+                    implementacion de crear un menu interactivo para escoger el color que se escoge con la carta WILD.
+                    */
                     System.out.println("WILD USED!");
                     if (targetPlayer == machinePlayer) {
                         printCardsHumanPlayer();
@@ -540,6 +546,7 @@ public class GameUnoController {
                         String color = options.get(index);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
+                        labelAlertMachine.setText("La maquina escogió el color: " + color);
                         buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
@@ -550,6 +557,7 @@ public class GameUnoController {
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
                         gameUno.eatCard(machinePlayer, 2); //la machin come 2
                         printCardsMachinePlayer(); //imprimir para que se vea las que comio
+                        labelAlertMachine.setText("La maquina comió 2 cartas");
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
@@ -564,6 +572,7 @@ public class GameUnoController {
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
                         gameUno.eatCard(machinePlayer, 4); //la machin come 4
                         printCardsMachinePlayer();//imprimir para que se vea las que comio
+                        labelAlertMachine.setText("La maquina comió 4 cartas");
 
                         //logica para cambiar el color del juego
                         Optional<String> result = dialog.showAndWait();
@@ -583,6 +592,7 @@ public class GameUnoController {
                         String color = options.get(index);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
+                        labelAlertMachine.setText("La maquina escogió el color: " + color);
                         buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false);//el turno ahora es del player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
@@ -622,5 +632,9 @@ public class GameUnoController {
             case "Verde" -> "GREEN";
             default -> null;
         };
+    }
+
+    public Label getLabelAlertMachine() {
+        return labelAlertMachine;
     }
 }
