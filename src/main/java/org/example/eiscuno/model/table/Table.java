@@ -27,34 +27,40 @@ public class Table {
     }
 
 
-    /*
-    Este metodo esta pensado para hacer las validaciones de si una carta se puede jugar o no
-    dependiendo de la carta que esta en la mesa
+    /**
+     * Verifica si una carta puede ser jugada sobre la carta actual en la mesa.
+     * @param card La carta que el jugador intenta jugar
+     * @return true si la jugada es válida, false si no lo es
      */
     public boolean isValidPlay(Card card) {
-        /*
-        Aqui usamos un operador ternario ya que al inicio cuando la mesa esta vacia produciria un error el querer obtener la carta en la mesa
-         */
-        Card currentCard = this.getCardsTable().isEmpty() ? null : getCurrentCardOnTheTable() ;
-
-        /*
-        Aqui digo que si la mesa esta vacia
-        o que si la carta en la mesa es de color negro pues que ponga lo que quiera
-        */
-        if( this.getCardsTable().isEmpty() || currentCard.getColor().equals("BLACK")) {
-            this.addCardOnTheTable(card);
+        // Si la carta jugada originalmente es negra (comodín o +4), se puede jugar siempre
+        if (card.getOriginalColor().equals("BLACK")) {
+            this.addCardOnTheTable(card); //Se coloca la carta sobre la mesa
             return true;
         }
-        /*
-        Aqui se dice que si el color de la carta en la mesa es igual a la carta que se quiere poner
-        o que si el valor de la carta en la mesa es igual al valor de la carta que se quiere poner pues que lo deje
-        o la otra es que si la carta que se quiere poner es de color negro pues que lo deje
-        */
-        else if(currentCard.getColor().equals(card.getColor())  || currentCard.getValue().equals(card.getValue()) || card.getColor().equals("BLACK")) {
+
+        //Si la mesa está vacía, se permite colocar cualquier carta (normalmente solo al inicio del juego)
+        if (this.getCardsTable().isEmpty()) {
             this.addCardOnTheTable(card);
             return true;
         }
 
+        //Se obtiene la carta actualmente en la parte superior de la pila de la mesa
+        Card currentCard = getCurrentCardOnTheTable();
+
+        //Si la carta jugada coincide en color con la carta actual en la mesa
+        if (currentCard.getColor().equals(card.getColor())) {
+            this.addCardOnTheTable(card); // Se coloca la carta sobre la mesa
+            return true;
+        }
+
+        //Si la carta jugada coincide en valor con la carta actual en la mesa (por ejemplo, dos "3")
+        if (currentCard.getValue().equals(card.getValue())) {
+            this.addCardOnTheTable(card); // Se coloca la carta sobre la mesa
+            return true;
+        }
+
+        //Si no cumple ninguna de las condiciones anteriores, la jugada no es válida
         return false;
     }
 

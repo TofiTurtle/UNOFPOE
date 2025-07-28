@@ -12,6 +12,7 @@ public class Card {
     private String color;
     private Image image;
     private ImageView cardImageView;
+    private final String originalColor;
 
     /**
      * Constructs a Card with the specified image URL and name.
@@ -23,6 +24,7 @@ public class Card {
         this.url = url;
         this.value = value;
         this.color = color;
+        this.originalColor = color;
         this.image = new Image(String.valueOf(getClass().getResource(url)));
         this.cardImageView = createCardImageView();
     }
@@ -77,6 +79,11 @@ public class Card {
     public String getColor() {
         return color;
     }
+
+    public String getOriginalColor() {
+        return originalColor;
+    }
+
 
     /*
     Este metodo lo que hara es retornar verdadero si la carta es alguna carta comodin
