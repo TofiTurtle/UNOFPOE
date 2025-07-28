@@ -39,7 +39,7 @@
                         <Image url="@images/button_uno.png" />
                      </image>
                   </ImageView>
-                  <Button fx:id="buttonUNO" layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="80.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white; -fx-opacity: 0;" text="UNO" />
+                  <Button fx:id="buttonUNO" layoutX="41.0" layoutY="56.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="86.0" prefWidth="109.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white; -fx-opacity: 0;" text="UNO" />
                   <Button fx:id="buttonExit" layoutX="155.0" layoutY="178.0" mnemonicParsing="false" onAction="#onHandleExit" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white;" text="Salir" />
                </children>
             </Pane>
@@ -48,7 +48,7 @@
             <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
                   <ImageView fx:id="tableImageView" fitHeight="149.0" fitWidth="100.0" layoutX="85.0" layoutY="34.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="labelAlertMachine" layoutX="2.0" prefHeight="23.0" prefWidth="260.0" text="Label para alertas (A agregar)" textFill="WHITE">
+                  <Label fx:id="labelAlertMachine" layoutX="-6.0" prefHeight="34.0" prefWidth="282.0" style="-fx-alignment: center;" text="Label para alertas (A agregar)" textFill="WHITE">
                      <font>
                         <Font name="Arial Black" size="14.0" />
                      </font>
