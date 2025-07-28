@@ -33,7 +33,7 @@ public class ThreadPlayMachine extends Thread {
         while (true) {
             if (hasPlayerPlayed) {
                 // desactivar UI del jugador
-                Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(true));
+                Platform.runLater(() -> gameUnoController.stackPaneCardsPlayer.setDisable(true));
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -73,7 +73,7 @@ public class ThreadPlayMachine extends Thread {
                 }
 
                 // reactivar UI del jugador
-                Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(false));
+                Platform.runLater(() -> gameUnoController.stackPaneCardsPlayer.setDisable(false));
             }
         }
     }

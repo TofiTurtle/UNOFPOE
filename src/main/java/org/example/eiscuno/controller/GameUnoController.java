@@ -1,8 +1,12 @@
 package org.example.eiscuno.controller;
 
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
@@ -10,6 +14,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
+import org.example.eiscuno.exceptions.PenaltyException;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -18,7 +26,7 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
-
+import org.example.eiscuno.exceptions.PenaltyException;
 import java.util.*;
 
 /**
@@ -27,10 +35,10 @@ import java.util.*;
 public class GameUnoController {
 
     @FXML
-    private GridPane gridPaneCardsMachine;
+    private StackPane stackPaneCardsMachine;
 
     @FXML
-    public GridPane gridPaneCardsPlayer;
+    public StackPane stackPaneCardsPlayer;
 
     @FXML
     private ImageView tableImageView;
@@ -117,63 +125,125 @@ public class GameUnoController {
     }
 
     /**
-     * Prints the human player's cards on the grid pane.
+     * Prints the human player's cards on the stack pane.
      */
     public void printCardsHumanPlayer() {
-        this.gridPaneCardsPlayer.getChildren().clear();
-        Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);
+        this.stackPaneCardsPlayer.getChildren().clear();
+        List<Card> cards = this.humanPlayer.getCardsPlayer();
 
-        for (int i = 0; i < currentVisibleCardsHumanPlayer.length; i++) {
-            Card card = currentVisibleCardsHumanPlayer[i];
+        int offset = Math.max(20, 300 / cards.size()); //Cuanto se desplazara cada carta horizontalmente
+        int totalWidth = (cards.size() - 1) * offset;
+        int startOffset = -totalWidth / 2; // Para centrar horizontalmente
+
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
             ImageView cardImageView = card.getCard();
 
+            //SE PUEDE SEPARAR, esto es diseño de que el jugador pasa el cursor por encima de la carta y tenga un borde
+            //--------------
+            // Aplicar borde directamente al ImageView al hacer hover
+            cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
+
+            cardImageView.setOnMouseEntered(e -> {
+                cardImageView.setScaleX(1.05);
+                cardImageView.setScaleY(1.05);
+                cardImageView.setStyle("-fx-effect: dropshadow(gaussian, black, 10, 0.5, 0, 0);");
+            });
+
+            cardImageView.setOnMouseExited(e -> {
+                cardImageView.setScaleX(1.0);
+                cardImageView.setScaleY(1.0);
+                cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
+            });
             /*
             * Aqui es donde Player Juega una carta
             * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if(table.isValidPlay(card) ) {
-                    // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
-                    tableImageView.setImage(card.getImage());
-                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                    //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
-                    deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
-                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+                    //ANIMACION---------
+                    // 1. Crear duplicado de la carta para animación
+                    ImageView animatedCard = new ImageView(card.getImage());
+                    animatedCard.setFitWidth(cardImageView.getFitWidth());
+                    animatedCard.setFitHeight(cardImageView.getFitHeight());
 
-                    //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
-                    if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
-                        unoCheckStarted = true; //Evita que se lance mas de una vez
-                        checkUNO("PLAYER"); //Simula que la maquina espera a ver si el jugador dice uno
-                    }
+                    // 2. Obtener coordenadas absolutas de la carta jugada
+                    Bounds startBounds = cardImageView.localToScene(cardImageView.getBoundsInLocal());
 
-                    //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
-                    //y este pueda seguir tomando cartas
-                    if(card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
-                        buttonDeck.setDisable(false);
-                    }else{
-                        buttonDeck.setDisable(true);
-                    }
+                    // 3. Posicionar la carta animada en la escena
+                    animatedCard.setTranslateX(startBounds.getMinX());
+                    animatedCard.setTranslateY(startBounds.getMinY());
+
+                    // 4. Agregar al root
+                    Scene scene = cardImageView.getScene();
+                    Pane root = (Pane) scene.getRoot();
+                    root.getChildren().add(animatedCard);
+
+                    // 5. Obtener coordenadas destino (centro de la mesa)
+                    Bounds endBounds = tableImageView.localToScene(tableImageView.getBoundsInLocal());
+                    double endX = endBounds.getMinX() + tableImageView.getFitWidth() / 2 - cardImageView.getFitWidth() / 2;
+                    double endY = endBounds.getMinY() + tableImageView.getFitHeight() / 2 - cardImageView.getFitHeight() / 2;
+
+                    // 6. Crear animación
+                    TranslateTransition transition = new TranslateTransition(Duration.millis(500), animatedCard);
+                    transition.setToX(endX);
+                    transition.setToY(endY);
+                    transition.setInterpolator(Interpolator.EASE_OUT);
+
+                    transition.setOnFinished(ev -> {
+                        // Actualiza mesa
+                        tableImageView.setImage(card.getImage());
+
+                        // Eliminar la carta temporal animada
+                        root.getChildren().remove(animatedCard);
+
+
+                        // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
+                        humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                        //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
+                        deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
+                        System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: " + deck.getAuxDeckSize());
+
+                        //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
+                        if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
+                            unoCheckStarted = true; //Evita que se lance mas de una vez
+                            checkUNO("PLAYER"); //Simula que la maquina espera a ver si el jugador dice uno
+                        }
+
+                        //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
+                        //y este pueda seguir tomando cartas
+                        if (card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
+                            buttonDeck.setDisable(false);
+                        } else {
+                            buttonDeck.setDisable(true);
+                        }
 
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
                      */
-                    if(card.isSpecial()) { //si ES especial
-                        handleSpecialCard(card,machinePlayer); //dependiendo del caso, aplique efecto
-                    }
-                    else { //si no es especial... (normal )
-                        threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
-                    }
-                    printCardsHumanPlayer();
+                        if (card.isSpecial()) { //si ES especial
+                            Platform.runLater(() ->handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
+                            //Ese codigo se ejecute despues de que JavaFX haya terminado de procesar eventos actuales y no crashee con la animacion
+                        } else { //si no es especial... (normal )
+                            threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
+                        }
+                        printCardsHumanPlayer();
+                        //esto iria con un condicional y pondriamos una alerta o algo asi
+                        gameUno.isGameOver();
 
-                    //esto iria con un condicional y pondriamos una alerta o algo asi
-                    gameUno.isGameOver();
-
+                    });
+                    transition.play(); //Iniciamos animacion
+                    //SE ACABA ANIMACION
                 }
             });
-
-            this.gridPaneCardsPlayer.add(cardImageView, i, 0);
+            //Contenedor para superposición, sin bloquear clicks
+            StackPane container = new StackPane(cardImageView);
+            container.setPickOnBounds(false); //<-- evita bloquear otras cartas
+            container.setTranslateX(startOffset + i * offset);
+            this.stackPaneCardsPlayer.getChildren().add(container);
         }
     }
+
 
     /**
      * Este metodo verifica quién dice "UNO" primero: el jugador o la máquina.
@@ -198,20 +268,24 @@ public class GameUnoController {
 
                     //Si el jugador NO dijo UNO en ese tiempo, es penalizado
                     if (!playerSaidUNO) {
-                        System.out.println("La máquina dijo UNO primero. El jugador será penalizado.");
+                        try {
+                            //Excepcion marcada
+                            throw new PenaltyException("El jugador no dijo UNO a tiempo.", "PLAYER");
+                        } catch (PenaltyException e) {
 
-                        // Volvemos al hilo de la interfaz para modificar componentes visuales
-                        Platform.runLater(() -> {
-                            humanPlayer.addCard(deck.takeCard()); // El jugador recibe una carta de penalización
-                            printCardsHumanPlayer(); // Actualizamos visualmente las cartas del jugador
+                            // Volvemos al hilo de la interfaz para modificar componentes visuales
+                            Platform.runLater(() -> {
+                                humanPlayer.addCard(deck.takeCard()); // El jugador recibe una carta de penalización
+                                printCardsHumanPlayer(); // Actualizamos visualmente las cartas del jugador
 
-                            // Mostramos una alerta informando la penalización
-                            Alert alert = new Alert(Alert.AlertType.WARNING);
-                            alert.setTitle("UNO");
-                            alert.setHeaderText("¡La máquina dijo UNO primero!");
-                            alert.setContentText("Has sido penalizado con una carta.");
-                            alert.showAndWait();
-                        });
+                                // Mostramos una alerta informando la penalización
+                                Alert alert = new Alert(Alert.AlertType.WARNING);
+                                alert.setTitle("UNO");
+                                alert.setHeaderText("¡La máquina dijo UNO primero!");
+                                alert.setContentText("Has sido penalizado con una carta.");
+                                alert.showAndWait();
+                            });
+                        }
                     } else {
                         // Si el jugador dijo UNO a tiempo, no pasa nada
                         System.out.println("El jugador dijo UNO a tiempo.");
@@ -238,13 +312,28 @@ public class GameUnoController {
                     int delay = 1000 + new Random().nextInt(2000);
                     Thread.sleep(delay);
 
-                    //Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
+                    // Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
                     if (!machineSaidUNO) {
-                        machineSaidUNO = true; //La máquina se salva diciendo UNO
+                        machineSaidUNO = true;
                         System.out.println("La máquina dijo UNO a tiempo.");
+                    } else {
+                        try {
+                            throw new PenaltyException("La máquina no dijo UNO a tiempo.", "MACHINE");
+                        } catch (PenaltyException e) {
+                            Platform.runLater(() -> {
+                                if (e.getPenalizedEntity().equals("MACHINE")) {
+                                    machinePlayer.addCard(deck.takeCard());
+
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Penalización a la Máquina");
+                                    alert.setHeaderText("¡Le cantaste UNO primero a la máquina!");
+                                    alert.setContentText("La máquina fue penalizada con una carta.");
+                                    alert.showAndWait();
+                                }
+                            });
+                        }
                     }
 
-                    //Terminamos el proceso
                     unoCheckMachineStarted = false;
 
                 } catch (InterruptedException e) {
@@ -252,18 +341,28 @@ public class GameUnoController {
                 }
             }).start();
         }
+
     }
 
 
 
     public void printCardsMachinePlayer() {
-        this.gridPaneCardsMachine.getChildren().clear();
-        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePlayer();
+        this.stackPaneCardsMachine.getChildren().clear();
+        List<Card> cards = this.machinePlayer.getCardsPlayer();
+        int numCards = cards.size();
+        if (numCards == 0) return;
 
-        for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++) {
-            Card card = currentVisibleCardsMachinePlayer[i];
-            ImageView cardImageView = card.createCardImageViewBack();
-            this.gridPaneCardsMachine.add(cardImageView, i, 0);
+        int offset = Math.max(20, 300 / numCards); // Mismo cálculo que el jugador
+        int totalWidth = (numCards - 1) * offset;
+        int startOffset = -totalWidth / 2; // Centrado horizontal
+
+
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
+            ImageView cardImageView = card.createCardImageViewBack(); //Reverso
+            cardImageView.setTranslateX(startOffset + i * offset); //Superposición horizontal
+
+            stackPaneCardsMachine.getChildren().add(cardImageView);
         }
 
         // Si la máquina ya no tiene solo una carta, reiniciamos las banderas UNO
@@ -292,32 +391,6 @@ public class GameUnoController {
             }
         }
         return -1;
-    }
-
-    /**
-     * Handles the "Back" button action to show the previous set of cards.
-     *
-     * @param event the action event
-     */
-    @FXML
-    void onHandleBack(ActionEvent event) {
-        if (this.posInitCardToShow > 0) {
-            this.posInitCardToShow--;
-            printCardsHumanPlayer();
-        }
-    }
-
-    /**
-     * Handles the "Next" button action to show the next set of cards.
-     *
-     * @param event the action event
-     */
-    @FXML
-    void onHandleNext(ActionEvent event) {
-        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
-            this.posInitCardToShow++;
-            printCardsHumanPlayer();
-        }
     }
 
     /**
@@ -550,5 +623,4 @@ public class GameUnoController {
             default -> null;
         };
     }
-
 }
