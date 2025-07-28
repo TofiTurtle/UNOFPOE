@@ -33,7 +33,7 @@ public class ThreadPlayMachine extends Thread {
         while (true) {
             if (hasPlayerPlayed) {
                 // desactivar UI del jugador
-                Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(true));
+                Platform.runLater(() -> gameUnoController.stackPaneCardsPlayer.setDisable(true));
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -73,7 +73,7 @@ public class ThreadPlayMachine extends Thread {
                 }
 
                 // reactivar UI del jugador
-                Platform.runLater(() -> gameUnoController.gridPaneCardsPlayer.setDisable(false));
+                Platform.runLater(() -> gameUnoController.stackPaneCardsPlayer.setDisable(false));
             }
         }
     }
@@ -130,8 +130,13 @@ public class ThreadPlayMachine extends Thread {
         }
         else {
             machinePlayer.addCard(deck.takeCard());
-            //activar el boton para que el jugador pueda arrastrar
-            gameUnoController.buttonDeck.setDisable(false);
+
+            //Actualizar visualmente las cartas de la máquina
+            Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
+
+            //Activar el botón para que el jugador pueda arrastrar
+            Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
+
             setHasPlayerPlayed(false);
         }
     }
