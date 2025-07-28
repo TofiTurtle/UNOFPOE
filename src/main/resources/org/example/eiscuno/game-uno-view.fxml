@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="466.0" prefWidth="689.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
    <children>
       <ImageView fitHeight="595.0" fitWidth="1103.0" layoutX="-140.0" layoutY="-22.0" pickOnBounds="true" preserveRatio="true">
@@ -23,14 +22,24 @@
          <left>
             <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="buttonDeck" layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleTakeCard" prefHeight="50.0" prefWidth="80.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white;" text="Baraja" />
+                  <ImageView fx:id="imageViewDeck" fitHeight="173.0" fitWidth="136.0" layoutX="33.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@cards-uno/deck_of_cards.png" />
+                     </image>
+                  </ImageView>
+                  <Button fx:id="buttonDeck" layoutX="41.0" layoutY="36.0" mnemonicParsing="false" onAction="#onHandleTakeCard" prefHeight="129.0" prefWidth="117.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white; -fx-opacity: 0;" text="Baraja" />
                </children>
             </Pane>
          </left>
          <right>
             <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="buttonUNO" layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="80.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white;" text="UNO" />
+                  <ImageView fx:id="imageViewUNO" fitHeight="86.0" fitWidth="116.0" layoutX="36.0" layoutY="58.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/button_uno.png" />
+                     </image>
+                  </ImageView>
+                  <Button fx:id="buttonUNO" layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="80.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white; -fx-opacity: 0;" text="UNO" />
                   <Button fx:id="buttonExit" layoutX="155.0" layoutY="178.0" mnemonicParsing="false" onAction="#onHandleExit" style="-fx-background-radius: 25px; -fx-border-radius: 25px; -fx-border-color: black; -fx-border-width: 1px; -fx-background-color: white;" text="Salir" />
                </children>
             </Pane>

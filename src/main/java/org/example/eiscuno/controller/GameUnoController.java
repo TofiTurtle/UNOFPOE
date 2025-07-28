@@ -36,6 +36,12 @@ import java.util.*;
 public class GameUnoController {
 
     @FXML
+    public ImageView imageViewDeck;
+
+    @FXML
+    private ImageView imageViewUNO;
+
+    @FXML
     private Label labelAlertMachine;
 
     @FXML
@@ -202,8 +208,6 @@ public class GameUnoController {
                         // Eliminar la carta temporal animada
                         root.getChildren().remove(animatedCard);
 
-
-                        // gameUno.playCard(card); ya no se usa porque en el metodo ya se agregan
                         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                         //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
                         deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
@@ -218,8 +222,10 @@ public class GameUnoController {
                         //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                         //y este pueda seguir tomando cartas
                         if (card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
+                            imageViewDeck.setOpacity(1);
                             buttonDeck.setDisable(false);
                         } else {
+                            imageViewDeck.setOpacity(0.5);
                             buttonDeck.setDisable(true);
                         }
 
@@ -419,6 +425,7 @@ public class GameUnoController {
             System.out.println("Mazo vacio ----> RELLENANDO"); //avisamos que se rellena
             deck.RefillCards(); //llamamos metodo para rellenar!, el resto de codigo sigue igual...xd
             humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+            imageViewDeck.setOpacity(0.5);
             buttonDeck.setDisable(true);
             threadPlayMachine.setHasPlayerPlayed(true);
             printCardsHumanPlayer();
@@ -428,6 +435,7 @@ public class GameUnoController {
         }
         else {
             humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+            imageViewDeck.setOpacity(0.5);
             buttonDeck.setDisable(true);
             threadPlayMachine.setHasPlayerPlayed(true);
             printCardsHumanPlayer();
@@ -547,6 +555,7 @@ public class GameUnoController {
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
                         labelAlertMachine.setText("La maquina escogió el color: " + color);
+                        imageViewDeck.setOpacity(1);
                         buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
@@ -562,6 +571,7 @@ public class GameUnoController {
                     }else{ //si lo tiro la machin
                         gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
                         printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        imageViewDeck.setOpacity(1);
                         buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
@@ -593,6 +603,7 @@ public class GameUnoController {
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
                         labelAlertMachine.setText("La maquina escogió el color: " + color);
+                        imageViewDeck.setOpacity(1);
                         buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false);//el turno ahora es del player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
@@ -606,6 +617,7 @@ public class GameUnoController {
 
     public void deactivateEmptyDeck() {
         if(deck.isEmpty()) {
+            imageViewDeck.setOpacity(0.5);
             buttonDeck.setDisable(true);
         }
     }

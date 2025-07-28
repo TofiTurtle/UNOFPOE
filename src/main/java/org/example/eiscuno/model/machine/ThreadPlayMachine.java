@@ -68,6 +68,7 @@ public class ThreadPlayMachine extends Thread {
                 }
                 else {
                     // carta normal → pasa el turno a humano
+                    gameUnoController.imageViewDeck.setOpacity(1);
                     gameUnoController.buttonDeck.setDisable(false);
                     hasPlayerPlayed = false;
                     //Aqui la maquina tiro una carta NORMAL, como PUSO-> Guardamos en auxiliar
@@ -143,6 +144,7 @@ public class ThreadPlayMachine extends Thread {
             Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
 
             //Activar el botón para que el jugador pueda arrastrar
+            Platform.runLater(() -> gameUnoController.imageViewDeck.setOpacity(1));
             Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
 
             setHasPlayerPlayed(false);
