@@ -46,6 +46,9 @@ public class ThreadPlayMachine extends Thread {
 
                 if (cardPlayed == null) {
                     handleTakeCard();
+                    Platform.runLater(() -> {
+                        gameUnoController.getLabelAlertMachine().setText("La maquina arrastró una carta");
+                    });
                 }
                 else if (cardPlayed.isSpecial()) {
                     // esperamos a que handleSpecialCard termine de ejecutarse en el FX‐thread
@@ -65,6 +68,7 @@ public class ThreadPlayMachine extends Thread {
                 }
                 else {
                     // carta normal → pasa el turno a humano
+                    gameUnoController.imageViewDeck.setOpacity(1);
                     gameUnoController.buttonDeck.setDisable(false);
                     hasPlayerPlayed = false;
                     //Aqui la maquina tiro una carta NORMAL, como PUSO-> Guardamos en auxiliar
@@ -111,6 +115,11 @@ public class ThreadPlayMachine extends Thread {
                 }
                 System.out.println("----------------------------------------------\n");
 
+                //actualizo el label con la informacion de que se jugo una carta
+                Platform.runLater(() -> {
+                    gameUnoController.getLabelAlertMachine().setText("La maquina jugó una carta");
+                });
+
                 //retorno la carta jugada
                 return selectedCard;
             }
@@ -135,6 +144,7 @@ public class ThreadPlayMachine extends Thread {
             Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
 
             //Activar el botón para que el jugador pueda arrastrar
+            Platform.runLater(() -> gameUnoController.imageViewDeck.setOpacity(1));
             Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
 
             setHasPlayerPlayed(false);

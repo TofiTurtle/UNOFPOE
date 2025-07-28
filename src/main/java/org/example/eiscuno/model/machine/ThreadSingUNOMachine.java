@@ -37,7 +37,7 @@ public class ThreadSingUNOMachine implements Runnable{
                 gameUnoController.unoCheckStarted &&
                 !gameUnoController.playerSaidUNO &&
                 !alreadyNotified) {
-
+            gameUnoController.getLabelAlertMachine().setText("La maquina te cantó UNO");
             alreadyNotified = true;
         }
 
