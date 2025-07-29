@@ -3,6 +3,7 @@ package org.example.eiscuno.view;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class GameUnoStage extends Stage {
      */
     public GameUnoStage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/game-uno-view.fxml"));
-        Parent root;
+        AnchorPane root;
         try {
             root = loader.load();
         } catch (IOException e) {
