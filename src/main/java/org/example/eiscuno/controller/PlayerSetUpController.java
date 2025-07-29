@@ -22,33 +22,39 @@ public class PlayerSetUpController {
     private Label emptyNameLabel;
     private List<Image> images;
     private int currentIndex = 2;
+/*Ojo vivo, necesitaremos algo asi luego en el controlador
+    private String PathListImages[] = { "/com/example/batallanavalfpoe/images/character1.PNG", "/com/example/batallanavalfpoe/images/character2.PNG", "/com/example/batallanavalfpoe/images/character3.PNG",
+            "/com/example/batallanavalfpoe/images/character4.PNG","/com/example/batallanavalfpoe/images/character5.PNG","/com/example/batallanavalfpoe/images/character6.PNG", "/com/example/batallanavalfpoe/images/character7.PNG"
+    };
 
-    @FXML
+ */
+    @FXML //que este codigo se ejecute siempre cuando se inice
     public void initialize() {
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.trim().isEmpty()) {
-                emptyNameLabel.setVisible(false); // mira si esta vacio para mostrar el mensaje de trin
+                emptyNameLabel.setVisible(false); // mira si esta vacio para mostrar el mensaje de ingresar nombre
             }
         });
-
+        //Lista que contiene las imagenes disponibles (falta agregarlas)
         images = List.of(
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_blue.png")),
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_green.png")),
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_yellow.png")),
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_red.png"))
         );
-        imageView.setImage(images.get(currentIndex));
+        imageView.setImage(images.get(currentIndex)); //iniiclamente se pone una imagen x cualquiera
 
     }
 
+    //Metodos para cambiar de imagen y asi el jugador pueda escoger la que desee
     @FXML
     private void nextImage() {
-        if (currentIndex < images.size() - 1) {
-            currentIndex++;
-            imageView.setImage(images.get(currentIndex));
-        } else {
-            currentIndex = 0;
-            imageView.setImage(images.get(currentIndex));
+        if (currentIndex < images.size() - 1) {  //si es menor que el tamaño-1 (recordar listas van desde 0)
+            currentIndex++; //suma a la variable currenIndex (imgen que se muestra actualmente=
+            imageView.setImage(images.get(currentIndex)); //se pone visualmente
+        } else { //si NO es menor (osea, es igual a 3), ya esta en la cola, por lo que con el siguiente click
+            currentIndex = 0; //pasa a la cabeza de la lsita de imagenes.
+            imageView.setImage(images.get(currentIndex)); //se pone visualmente
         }
     }
 
@@ -67,7 +73,7 @@ public class PlayerSetUpController {
 
 
 
-    //metodos existentes de botones iniciales
+    //metodos existentes de botones iniciales-------------------
     @FXML
     void goBackToStart(ActionEvent event) throws IOException {
         StartUnoView.getInstance();
@@ -75,7 +81,11 @@ public class PlayerSetUpController {
     }
     @FXML
     void startGame(ActionEvent event) throws IOException {
-        GameUnoStage.getInstance();
+        //Para el gameUnostage, le pasaremos el nombre y la imagen que se escogio
+        String name = textField.getText().trim();
+        int currentImageIndex = currentIndex;
+        //se los pasamos al gmunostage
+        GameUnoStage.getInstance(name,images.get(currentIndex));
         PlayerSetUpStage.deleteInstance();
     }
 

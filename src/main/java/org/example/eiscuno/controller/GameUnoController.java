@@ -78,6 +78,9 @@ public class GameUnoController {
     public boolean unoCheckStarted = false;
     private Map<Card, ImageView> machineCardViews = new HashMap<>();
 
+    private String playerName;
+    private Image currentImage;
+    private Image pendingCharacterImage;
 
     /**
      * Initializes the controller.
@@ -134,6 +137,18 @@ public class GameUnoController {
         this.posInitCardToShow = 0;
 
     }
+
+    public void initPlayer(String playerName, Image currentImage) {
+        this.playerName = playerName;
+        this.currentImage = currentImage;
+        // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
+    }
+    public void prueba(){
+        System.out.println("Nombre del papu: "+ playerName);
+    }
+
+
+
 
     /**
      * Prints the human player's cards on the stack pane.
