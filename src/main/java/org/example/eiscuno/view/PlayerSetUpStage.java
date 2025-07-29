@@ -7,12 +7,12 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class PlayerSetUp extends Stage {
+public class PlayerSetUpStage extends Stage {
     /*
     Se crea la vista de inicio con el patron singlenton
      */
 
-    public PlayerSetUp() throws IOException {
+    public PlayerSetUpStage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/PlayerSetUp.fxml"));
         Parent root;
         try {
@@ -28,13 +28,13 @@ public class PlayerSetUp extends Stage {
     }
 
     private static class PlayerSetUpHolder {
-        private static PlayerSetUp INSTANCE;
+        private static PlayerSetUpStage INSTANCE;
 
     }
-    public static PlayerSetUp getInstance() throws IOException {
-        return PlayerSetUp.PlayerSetUpHolder.INSTANCE != null ?
-                PlayerSetUp.PlayerSetUpHolder.INSTANCE :
-                (PlayerSetUp.PlayerSetUpHolder.INSTANCE = new PlayerSetUp());
+    public static PlayerSetUpStage getInstance() throws IOException {
+        return PlayerSetUpStage.PlayerSetUpHolder.INSTANCE != null ?
+                PlayerSetUpStage.PlayerSetUpHolder.INSTANCE :
+                (PlayerSetUpStage.PlayerSetUpHolder.INSTANCE = new PlayerSetUpStage());
     }
     public static void deleteInstance() {
         PlayerSetUpHolder.INSTANCE.close();

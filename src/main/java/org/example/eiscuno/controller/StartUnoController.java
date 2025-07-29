@@ -3,11 +3,7 @@ package org.example.eiscuno.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import org.example.eiscuno.model.game.GameUno;
-import org.example.eiscuno.view.GameUnoStage;
-import org.example.eiscuno.view.PlayerSetUp;
+import org.example.eiscuno.view.PlayerSetUpStage;
 import org.example.eiscuno.view.StartUnoView;
 
 import java.io.IOException;
@@ -41,8 +37,8 @@ public class StartUnoController {
         //GameUnoStage.getInstance();
         //StartUnoView.deleteInstance();
 
-        //Ahora, de Start Uno -> PlayerSetUp -> Game Uno
-        PlayerSetUp.getInstance(); //creamos instance de el playersetup
+        //Ahora, de Start Uno -> PlayerSetUpStage -> Game Uno
+        PlayerSetUpStage.getInstance(); //creamos instance de el playersetup
         StartUnoView.deleteInstance(); //borramos la ventana anterior
     }
 }
