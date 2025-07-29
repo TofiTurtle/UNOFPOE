@@ -45,7 +45,7 @@ public class GameUnoController {
     private Label labelAlertMachine;
 
     @FXML
-    private StackPane stackPaneCardsMachine;
+    private Pane stackPaneCardsMachine;
 
     @FXML
     public StackPane stackPaneCardsPlayer;
@@ -76,7 +76,7 @@ public class GameUnoController {
     public boolean machineSaidUNO = false;
     public boolean unoCheckMachineStarted = false;
     public boolean unoCheckStarted = false;
-
+    private Map<Card, ImageView> machineCardViews = new HashMap<>();
 
 
     /**
@@ -116,7 +116,7 @@ public class GameUnoController {
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck, this);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck ,this, machineCardViews, stackPaneCardsMachine);
         threadPlayMachine.start();
 
 
@@ -172,42 +172,9 @@ public class GameUnoController {
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 labelAlertMachine.setText("");
                 if(table.isValidPlay(card) ) {
-                    //ANIMACION---------
-                    // 1. Crear duplicado de la carta para animación
-                    ImageView animatedCard = new ImageView(card.getImage());
-                    animatedCard.setFitWidth(cardImageView.getFitWidth());
-                    animatedCard.setFitHeight(cardImageView.getFitHeight());
 
-                    // 2. Obtener coordenadas absolutas de la carta jugada
-                    Bounds startBounds = cardImageView.localToScene(cardImageView.getBoundsInLocal());
-
-                    // 3. Posicionar la carta animada en la escena
-                    animatedCard.setTranslateX(startBounds.getMinX());
-                    animatedCard.setTranslateY(startBounds.getMinY());
-
-                    // 4. Agregar al root
-                    Scene scene = cardImageView.getScene();
-                    Pane root = (Pane) scene.getRoot();
-                    root.getChildren().add(animatedCard);
-
-                    // 5. Obtener coordenadas destino (centro de la mesa)
-                    Bounds endBounds = tableImageView.localToScene(tableImageView.getBoundsInLocal());
-                    double endX = endBounds.getMinX() + tableImageView.getFitWidth() / 2 - cardImageView.getFitWidth() / 2;
-                    double endY = endBounds.getMinY() + tableImageView.getFitHeight() / 2 - cardImageView.getFitHeight() / 2;
-
-                    // 6. Crear animación
-                    TranslateTransition transition = new TranslateTransition(Duration.millis(500), animatedCard);
-                    transition.setToX(endX);
-                    transition.setToY(endY);
-                    transition.setInterpolator(Interpolator.EASE_OUT);
-
-                    transition.setOnFinished(ev -> {
-                        // Actualiza mesa
-                        tableImageView.setImage(card.getImage());
-
-                        // Eliminar la carta temporal animada
-                        root.getChildren().remove(animatedCard);
-
+                    // Usamos la clase Animations
+                    Animations.playCardAnimation(card, cardImageView, tableImageView, () -> {
                         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                         //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
                         deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
@@ -234,7 +201,7 @@ public class GameUnoController {
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
                      */
                         if (card.isSpecial()) { //si ES especial
-                            Platform.runLater(() ->handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
+                            Platform.runLater(() -> handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
                             //Ese codigo se ejecute despues de que JavaFX haya terminado de procesar eventos actuales y no crashee con la animacion
                         } else { //si no es especial... (normal )
                             threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
@@ -244,8 +211,6 @@ public class GameUnoController {
                         gameUno.isGameOver();
 
                     });
-                    transition.play(); //Iniciamos animacion
-                    //SE ACABA ANIMACION
                 }
             });
             //Contenedor para superposición, sin bloquear clicks
@@ -287,10 +252,19 @@ public class GameUnoController {
 
                             // Volvemos al hilo de la interfaz para modificar componentes visuales
                             Platform.runLater(() -> {
-                                humanPlayer.addCard(deck.takeCard()); // El jugador recibe una carta de penalización
-                                printCardsHumanPlayer(); // Actualizamos visualmente las cartas del jugador
+                                Card penaltyCard = deck.takeCard();
+                                humanPlayer.getCardsPlayer().add(penaltyCard); // Lógica del juego
 
-                                // Mostramos una alerta informando la penalización
+                                // Hacemos la animación desde el mazo hasta la mano del jugador
+                                Animations.animateCardFromDeck(
+                                        Card.getBackImage(),            // Imagen boca abajo
+                                        imageViewDeck,                  // Nodo de origen (mazo)
+                                        stackPaneCardsPlayer,          // Nodo destino (mano del jugador)
+                                        false,                          // false porque no es la máquina
+                                        () -> printCardsHumanPlayer()  // Acción que actualiza la mano
+                                );
+
+                                // Mostramos la alerta
                                 Alert alert = new Alert(Alert.AlertType.WARNING);
                                 alert.setTitle("UNO");
                                 alert.setHeaderText("¡La máquina dijo UNO primero!");
@@ -360,6 +334,8 @@ public class GameUnoController {
 
     public void printCardsMachinePlayer() {
         this.stackPaneCardsMachine.getChildren().clear();
+        this.machineCardViews.clear(); // <--- LIMPIAMOS EL MAPA
+
         List<Card> cards = this.machinePlayer.getCardsPlayer();
         int numCards = cards.size();
         if (numCards == 0) return;
@@ -372,10 +348,15 @@ public class GameUnoController {
         for (int i = 0; i < cards.size(); i++) {
             Card card = cards.get(i);
             ImageView cardImageView = card.createCardImageViewBack(); //Reverso
-            cardImageView.setTranslateX(startOffset + i * offset); //Superposición horizontal
+
+            // Posición explícita en el Pane
+            cardImageView.setLayoutX(150 + i * offset); // puedes ajustar 150 según el centro
+            cardImageView.setLayoutY(0);
 
             stackPaneCardsMachine.getChildren().add(cardImageView);
+            machineCardViews.put(card, cardImageView); // Guardamos la referencia
         }
+
 
         // Si la máquina ya no tiene solo una carta, reiniciamos las banderas UNO
         if (machinePlayer.getCardsPlayer().size() != 1) {
@@ -466,6 +447,15 @@ public class GameUnoController {
 
             //Actualiza la vista de la maquina de inmediato
             printCardsMachinePlayer();
+
+            // Animación: carta del mazo a la máquina (boca abajo)
+            Animations.animateCardFromDeck(
+                    Card.getBackImage(),               // Imagen del reverso
+                    imageViewDeck,                     // Mazo
+                    stackPaneCardsMachine,             // Mano de la máquina
+                    true,                              // Es máquina
+                    () -> printCardsMachinePlayer()    // Actualizar visual
+            );
 
             //Reiniciamos banderas de vigilancia de UNO
             unoCheckMachineStarted = false;

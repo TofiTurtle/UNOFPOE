@@ -59,7 +59,7 @@
          <top>
             <HBox alignment="CENTER" prefHeight="133.0" prefWidth="600.0" spacing="10.0" BorderPane.alignment="CENTER">
                <children>
-                  <StackPane fx:id="stackPaneCardsMachine" alignment="CENTER" prefHeight="133.0" prefWidth="600.0" />
+                  <Pane fx:id="stackPaneCardsMachine" prefHeight="133.0" prefWidth="600.0" />
                </children>
             </HBox>
          </top>

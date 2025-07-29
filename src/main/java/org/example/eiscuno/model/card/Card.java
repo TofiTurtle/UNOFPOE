@@ -13,6 +13,7 @@ public class Card {
     private Image image;
     private ImageView cardImageView;
     private final String originalColor;
+    private static final Image backImage = new Image(Card.class.getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
 
     /**
      * Constructs a Card with the specified image URL and name.
@@ -43,7 +44,7 @@ public class Card {
     }
 
     public ImageView createCardImageViewBack() {
-        ImageView card = new ImageView(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
+        ImageView card = new ImageView(backImage);
         card.setY(16);
         card.setFitHeight(90);
         card.setFitWidth(70);
@@ -93,5 +94,8 @@ public class Card {
         return this.getValue().startsWith("SKIP") || this.getValue().startsWith("WILD") || this.getValue().startsWith("TWO_WILD") || this.getValue().startsWith("FOUR_WILD") || this.getValue().startsWith("RESERVE");
     }
 
+    public static Image getBackImage() {
+        return backImage;
+    }
 
 }
