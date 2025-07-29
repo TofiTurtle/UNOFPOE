@@ -250,6 +250,7 @@ public class GameUnoController {
         //Primer caso: Es el jugador quien tiene solo una carta
         if (who.equals("PLAYER")) {
             unoCheckStarted = true;//Se activa la bandera que indica que ya estamos revisando si el jugador dice UNO
+            playerSaidUNO = false;  // ← Reiniciar bandera para evitar heredar valor anterior
             System.out.println("El jugador tiene solo una carta, esperando quién dice UNO primero...");
 
             new Thread(() -> { //Creamos un nuevo hilo para no bloquear la interfaz gráfica
@@ -305,6 +306,7 @@ public class GameUnoController {
             //Segundo caso: Es la máquina quien tiene una sola carta
         } else if (who.equals("MACHINE")) {
             unoCheckMachineStarted = true; //Activamos la bandera de que estamos esperando si la máquina dice UNO
+            machineSaidUNO = false; // Reiniciar bandera aquí para evitar que herede el valor anterior
             System.out.println("La máquina tiene solo una carta. Esperando si el jugador le canta...");
 
             new Thread(() -> { //También usamos un hilo para no bloquear la interfaz
@@ -412,6 +414,8 @@ public class GameUnoController {
          Ahora el jugador llama a su metodo de agregar una carta
           y a su vez llama a la baraja para que le muestra la carta del peek y la quite
          */
+        //Desactivamos de inmediato para evitar doble click
+        buttonDeck.setDisable(true);
         labelAlertMachine.setText(""); //limpio el label
         /*OJO VIVO, tenemos que colocar esta condicion como que si el mazo llega a tener 5 o menos cartas
         para hacer el refill, ya que si se deja en cuando quede vacio, si la ultima carta en ser lanzada
@@ -447,7 +451,6 @@ public class GameUnoController {
                     () -> {
                         humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
                         imageViewDeck.setOpacity(0.5);
-                        buttonDeck.setDisable(true);
                         threadPlayMachine.setHasPlayerPlayed(true);
                         printCardsHumanPlayer();
                     }
