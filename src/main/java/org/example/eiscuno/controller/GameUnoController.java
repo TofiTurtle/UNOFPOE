@@ -45,7 +45,7 @@ public class GameUnoController {
     private Label labelAlertMachine;
 
     @FXML
-    private Pane stackPaneCardsMachine;
+    public Pane stackPaneCardsMachine;
 
     @FXML
     public StackPane stackPaneCardsPlayer;
@@ -162,9 +162,9 @@ public class GameUnoController {
         int startOffset = -totalWidth / 2; // Para centrar horizontalmente
 
         for (int i = 0; i < cards.size(); i++) {
+
             Card card = cards.get(i);
             ImageView cardImageView = card.getCard();
-
             //SE PUEDE SEPARAR, esto es diseño de que el jugador pasa el cursor por encima de la carta y tenga un borde
             //--------------
             // Aplicar borde directamente al ImageView al hacer hover
@@ -420,23 +420,39 @@ public class GameUnoController {
         if(deck.getDeckSize()<=4) { //si hay 4 o menos cartas...
             System.out.println("Mazo vacio ----> RELLENANDO"); //avisamos que se rellena
             deck.RefillCards(); //llamamos metodo para rellenar!, el resto de codigo sigue igual...xd
-            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
-            imageViewDeck.setOpacity(0.5);
-            buttonDeck.setDisable(true);
-            threadPlayMachine.setHasPlayerPlayed(true);
-            printCardsHumanPlayer();
-            //deactivateEmptyDeck(); -->Esto(y su metodo) se puede quitar, pues ya no se nos "bloquea"
-            //si no que se rebaraja haciendo partidas largas.
 
+            // Animación con carta boca abajo
+            Image cardBackImage = new Image("/org/example/eiscuno/cards-uno/card_uno.png");
+            Animations.animateCardFromDeck(
+                    cardBackImage,
+                    imageViewDeck,
+                    stackPaneCardsPlayer,
+                    false, // no es máquina
+                    () -> {
+                        humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+                        imageViewDeck.setOpacity(0.5);
+                        buttonDeck.setDisable(true);
+                        threadPlayMachine.setHasPlayerPlayed(true);
+                        printCardsHumanPlayer();
+                    }
+            );
+        } else {
+            // Animación con carta boca abajo
+            Image cardBackImage = new Image("/org/example/eiscuno/cards-uno/card_uno.png");
+            Animations.animateCardFromDeck(
+                    cardBackImage,
+                    imageViewDeck,
+                    stackPaneCardsPlayer,
+                    false, // no es máquina
+                    () -> {
+                        humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+                        imageViewDeck.setOpacity(0.5);
+                        buttonDeck.setDisable(true);
+                        threadPlayMachine.setHasPlayerPlayed(true);
+                        printCardsHumanPlayer();
+                    }
+            );
         }
-        else {
-            humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
-            imageViewDeck.setOpacity(0.5);
-            buttonDeck.setDisable(true);
-            threadPlayMachine.setHasPlayerPlayed(true);
-            printCardsHumanPlayer();
-        }
-
     }
 
     /**
@@ -505,6 +521,7 @@ public class GameUnoController {
      */
     /*Nota de Juan: si le hiciste pull o algo, de momento no uso esta funcion en el controller, mñna cambio
     la logica para que quede mas compacto
+    //Nota d Pipe: cambio lo del two wild y +4 para agregar la animacion
     *
     * */
     public void handleSpecialCard(Card card, Player targetPlayer) {
@@ -569,13 +586,11 @@ public class GameUnoController {
                 case "TWO_WILD":
                     System.out.println("TWO_WILD USED! +2");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
-                        gameUno.eatCard(machinePlayer, 2); //la machin come 2
-                        printCardsMachinePlayer(); //imprimir para que se vea las que comio
+                        Animations.animateEatCards(machinePlayer, 2, true, gameUno, this); // animación y logica
                         labelAlertMachine.setText("La maquina comió 2 cartas");
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
-                        gameUno.eatCard(humanPlayer, 2); //el jugador se come 2
-                        printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        Animations.animateEatCards(humanPlayer, 2, false, gameUno, this);
                         imageViewDeck.setOpacity(1);
                         buttonDeck.setDisable(false);
                         threadPlayMachine.setHasPlayerPlayed(false); //el turno ahora es del player
@@ -585,8 +600,7 @@ public class GameUnoController {
                 case "FOUR_WILD":
                     System.out.println("FOUR_WILD USED! +4");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
-                        gameUno.eatCard(machinePlayer, 4); //la machin come 4
-                        printCardsMachinePlayer();//imprimir para que se vea las que comio
+                        Animations.animateEatCards(machinePlayer, 4, true, gameUno, this);
                         labelAlertMachine.setText("La maquina comió 4 cartas");
 
                         //logica para cambiar el color del juego
@@ -600,8 +614,7 @@ public class GameUnoController {
 
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
-                        gameUno.eatCard(humanPlayer, 4); //el jugador se come 4
-                        printCardsHumanPlayer(); //imprimir para que se vea las que comio
+                        Animations.animateEatCards(humanPlayer, 4, false, gameUno, this);
                         Random random = new Random();
                         int index = random.nextInt(options.size());
                         String color = options.get(index);
