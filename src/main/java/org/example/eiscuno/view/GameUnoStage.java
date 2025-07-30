@@ -33,7 +33,8 @@ public class GameUnoStage extends Stage {
 
         GameUnoController controller = loader.getController();
         controller.initPlayer(playerName, currentImage);
-        controller.prueba();
+        controller.setPlayerImage();
+        controller.setPlayerNickname();
 
         Scene scene = new Scene(root);
         // Configuring the stage

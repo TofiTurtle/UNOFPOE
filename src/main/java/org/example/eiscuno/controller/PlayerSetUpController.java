@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.example.eiscuno.model.saveGame.PlainTextFileHandler;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.PlayerSetUpStage;
 import org.example.eiscuno.view.StartUnoView;
@@ -22,12 +23,13 @@ public class PlayerSetUpController {
     private Label emptyNameLabel;
     private List<Image> images;
     private int currentIndex = 2;
-/*Ojo vivo, necesitaremos algo asi luego en el controlador
-    private String PathListImages[] = { "/com/example/batallanavalfpoe/images/character1.PNG", "/com/example/batallanavalfpoe/images/character2.PNG", "/com/example/batallanavalfpoe/images/character3.PNG",
-            "/com/example/batallanavalfpoe/images/character4.PNG","/com/example/batallanavalfpoe/images/character5.PNG","/com/example/batallanavalfpoe/images/character6.PNG", "/com/example/batallanavalfpoe/images/character7.PNG"
-    };
+    //Implementacion de archivos planos:
+    private PlainTextFileHandler plainTextFileHandler;
+    //necesitamos este arreglo para poder pasar la imagen despues
+    private String PathListImages[] = { "/org/example/eiscuno/cards-uno/skip_blue.png", "/org/example/eiscuno/cards-uno/skip_green.png", "/org/example/eiscuno/cards-uno/skip_yellow.png",
+            "/org/example/eiscuno/cards-uno/skip_red.png"};
 
- */
+
     @FXML //que este codigo se ejecute siempre cuando se inice
     public void initialize() {
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -43,7 +45,7 @@ public class PlayerSetUpController {
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_red.png"))
         );
         imageView.setImage(images.get(currentIndex)); //iniiclamente se pone una imagen x cualquiera
-
+        plainTextFileHandler = new PlainTextFileHandler();
     }
 
     //Metodos para cambiar de imagen y asi el jugador pueda escoger la que desee
@@ -83,8 +85,11 @@ public class PlayerSetUpController {
     void startGame(ActionEvent event) throws IOException {
         //Para el gameUnostage, le pasaremos el nombre y la imagen que se escogio
         String name = textField.getText().trim();
-        int currentImageIndex = currentIndex;
-        //se los pasamos al gmunostage
+        Image currentImage = images.get(currentIndex);
+        //Los metemos en el archivo plano -> (este almacenara el nombre y la imagen escogida por el usuario)
+        String content = name + "," + currentImage;
+        plainTextFileHandler.writeToFile("player_data.csv", content);
+        //se los pasamos al GameUnoStage
         GameUnoStage.getInstance(name,images.get(currentIndex));
         PlayerSetUpStage.deleteInstance();
     }

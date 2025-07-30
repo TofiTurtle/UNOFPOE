@@ -61,7 +61,10 @@ public class GameUnoController {
 
     @FXML
     private Button buttonUNO;
-
+    @FXML
+    private ImageView playerImage;
+    @FXML
+    private Label playerNickname;
 
     public Player humanPlayer;
     private Player machinePlayer;
@@ -80,7 +83,6 @@ public class GameUnoController {
 
     private String playerName;
     private Image currentImage;
-    private Image pendingCharacterImage;
 
     /**
      * Initializes the controller.
@@ -143,11 +145,13 @@ public class GameUnoController {
         this.currentImage = currentImage;
         // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
     }
-    public void prueba(){
-        System.out.println("Nombre del papu: "+ playerName);
+    //metodo pa ponerle la imagen al jugador
+    public void setPlayerImage() {
+        playerImage.setImage(currentImage);
     }
-
-
+    public void setPlayerNickname() {
+        playerNickname.setText(playerName);
+    }
 
 
     /**
@@ -647,6 +651,7 @@ public class GameUnoController {
     void onHandleExit(ActionEvent event) {
         GameUnoStage.deleteInstance();
     }
+
 
     //Getter para los Players
     public Player getMachinePlayer() {
