@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.example.eiscuno.controller.GameUnoController;
+import org.example.eiscuno.model.saveGame.GameState;
 
 import java.io.IOException;
 
@@ -21,7 +22,7 @@ public class GameUnoStage extends Stage {
      *
      * @throws IOException if an error occurs while loading the FXML file for the game interface.
      */
-    public GameUnoStage(String playerName, String currentImage) throws IOException {
+    public GameUnoStage(String playerName, String currentImage, GameState gameState) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/game-uno-view.fxml"));
         AnchorPane root;
         try {
@@ -32,9 +33,10 @@ public class GameUnoStage extends Stage {
         }
 
         GameUnoController controller = loader.getController();
-        controller.initPlayer(playerName, currentImage);
+        controller.initPlayer(playerName, currentImage, gameState);
         controller.setPlayerImage();
         controller.setPlayerNickname();
+        controller.prueba();
 
         Scene scene = new Scene(root);
         // Configuring the stage
@@ -60,10 +62,10 @@ public class GameUnoStage extends Stage {
      * @return the singleton instance of GameUnoStage.
      * @throws IOException if an error occurs while creating the instance.
      */
-    public static GameUnoStage getInstance(String playerName, String currentImage) throws IOException {
+    public static GameUnoStage getInstance(String playerName, String currentImage, GameState gameState) throws IOException {
         return GameUnoStageHolder.INSTANCE != null ?
                 GameUnoStageHolder.INSTANCE :
-                (GameUnoStageHolder.INSTANCE = new GameUnoStage(playerName,currentImage));
+                (GameUnoStageHolder.INSTANCE = new GameUnoStage(playerName,currentImage, gameState));
     }
 
     /**

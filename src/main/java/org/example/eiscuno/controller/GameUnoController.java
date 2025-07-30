@@ -156,10 +156,25 @@ public class GameUnoController {
     }
 
     //ESTOS METODOS DE ACA SON PURAMENTE PARA PONERLE LA IMAGEN Y NOMBRE SELECCIONADO AL JUGADOR!!!
-    public void initPlayer(String playerName, String currentImage) {
+    public void initPlayer(String playerName, String currentImage, GameState gameState) {
         this.playerName = playerName;
         this.currentImage = currentImage;
+        this.gameState = gameState;
         // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
+    }
+    public void prueba(){
+        if(gameState==null)
+        {
+            System.out.println("nueva partida");
+        }else{
+            System.out.println("Carta en Mesa" + gameState.getCardOnTable().getValue() + gameState.getCardOnTable().getColor());
+            //fragmento de codigo para imprimir cartas de jugador y verificar -> FUNCIONA!!
+            ArrayList<Card> playerCardsP = gameState.getPlayerCards();
+            for (Card card : playerCardsP) {
+                System.out.println(card.getValue() + " " + card.getColor());
+            }
+        }
+
     }
     //metodo pa ponerle la imagen al jugador
     public void setPlayerImage() {
