@@ -25,9 +25,14 @@ import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
+import org.example.eiscuno.model.saveGame.GameState;
+import org.example.eiscuno.model.saveGame.SerializableFileHandler;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.exceptions.PenaltyException;
+import org.example.eiscuno.view.StartUnoView;
+
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -80,9 +85,12 @@ public class GameUnoController {
     public boolean unoCheckMachineStarted = false;
     public boolean unoCheckStarted = false;
     private Map<Card, ImageView> machineCardViews = new HashMap<>();
-
+    //implementacion de archivo plano y serializable
     private String playerName;
     private String currentImage;
+
+    private SerializableFileHandler serializableFileHandler; //vaina para serializar
+    private GameState gameState; //objeto que tendra info (guardara las vainas)
 
     /**
      * Initializes the controller.
@@ -91,6 +99,8 @@ public class GameUnoController {
     public void initialize() {
         labelAlertMachine.setText("");
         initVariables();
+
+
 
         //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
         while(!initialValidCard) //mientras que NO sea una carta inicial valida, se repetira...
@@ -124,6 +134,9 @@ public class GameUnoController {
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck ,this, machineCardViews, stackPaneCardsMachine);
         threadPlayMachine.start();
 
+        //implementacion de serializable
+        serializableFileHandler = new SerializableFileHandler();
+
 
     }
 
@@ -140,6 +153,7 @@ public class GameUnoController {
 
     }
 
+    //ESTOS METODOS DE ACA SON PURAMENTE PARA PONERLE LA IMAGEN Y NOMBRE SELECCIONADO AL JUGADOR!!!
     public void initPlayer(String playerName, String currentImage) {
         this.playerName = playerName;
         this.currentImage = currentImage;
@@ -152,6 +166,24 @@ public class GameUnoController {
     public void setPlayerNickname() {
         playerNickname.setText(playerName);
     }
+    private void saveGame(){
+        ArrayList<Card> PlayerCards = humanPlayer.getCardsPlayer();
+        ArrayList<Card> machineCards =  machinePlayer.getCardsPlayer();
+        ArrayList<Card> deckCards = deck.getCards();
+        ArrayList<Card> auxdeckCards = deck.getAuxCards();
+        Card cardOnTable = table.getCurrentCardOnTheTable();
+
+        GameState gameState = new GameState(
+                PlayerCards, machineCards,
+                deckCards, auxdeckCards,
+                cardOnTable
+        );
+
+        serializableFileHandler.serialize("game_data.ser", gameState);
+        System.out.println("Si se guardo manito, calma! :)))");
+
+    }
+
 
 
     /**
@@ -198,7 +230,10 @@ public class GameUnoController {
                         //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
                         deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
                         System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: " + deck.getAuxDeckSize());
-
+                        //prueba para pillar que si guarde el serializable OJO VIVO
+                        saveGame();
+                        //mini prueba para ver que si se guarde la carta actual
+                        //System.out.println("CARTA ACTUAL EN LA MESA: " + table.getCurrentCardOnTheTable());
                         //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
                         if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
                             unoCheckStarted = true; //Evita que se lance mas de una vez
@@ -648,8 +683,11 @@ public class GameUnoController {
     }
 
     @FXML
-    void onHandleExit(ActionEvent event) {
+    void onHandleExit(ActionEvent event) throws IOException {
         GameUnoStage.deleteInstance();
+        //modifico esto para que cuando le des a salir no se salga del todou de la app,
+        //mejor que nos mande primero al menu. asi es mas facil hacer pruebas tbn
+        StartUnoView.getInstance();
     }
 
 

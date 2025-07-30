@@ -1,6 +1,44 @@
 package org.example.eiscuno.model.saveGame;
 
-public class GameState {
+import org.example.eiscuno.model.card.Card;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class GameState implements Serializable {
+    private ArrayList<Card> playerCards;
+    private ArrayList<Card> machineCards;
+    private ArrayList<Card> deckCards;
+    private ArrayList<Card> auxdeckCards;
+    private Card cardOnTable;
+
+
+    public GameState(ArrayList<Card> playerCards,ArrayList<Card> machineCards,
+                    ArrayList<Card> deckCards,ArrayList<Card> auxdeckCards,  Card cardOnTable) {
+        this.playerCards = playerCards;
+        this.machineCards = machineCards;
+        this.deckCards = deckCards;
+        this.auxdeckCards = auxdeckCards;
+        this.cardOnTable = cardOnTable;
+    }
+
+    public ArrayList<Card> getPlayerCards() {
+        return playerCards;
+    }
+    public ArrayList<Card> getMachineCards() {
+        return machineCards;
+    }
+    public ArrayList<Card> getDeckCards() {
+        return deckCards;
+    }
+    public ArrayList<Card> getAuxCards() {
+        return auxdeckCards;
+    }
+    public Card getCardOnTable() {
+        return cardOnTable;
+    }
+
+
 
 
 }

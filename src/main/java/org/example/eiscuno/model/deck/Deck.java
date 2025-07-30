@@ -155,6 +155,12 @@ public class Deck {
         deck.addAll(deckOfCards);
         return deck;
     }
+    public ArrayList<Card> getAuxCards() {
+        ArrayList<Card> auxdeck = new ArrayList<>();
+        auxdeck.addAll(AuxdeckOfCards);
+        return auxdeck;
+    }
+
     //implementacion para evitar el fin del juego: NUEVOS METODOS
 
     //metodos getter
