@@ -214,9 +214,6 @@ public class Animations {
 
         timeline.play();
     }
-
-
-
     // Otros métodos de animación...
     }
 

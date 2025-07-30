@@ -21,7 +21,7 @@ public class GameUnoStage extends Stage {
      *
      * @throws IOException if an error occurs while loading the FXML file for the game interface.
      */
-    public GameUnoStage(String playerName, Image currentImage) throws IOException {
+    public GameUnoStage(String playerName, String currentImage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/game-uno-view.fxml"));
         AnchorPane root;
         try {
@@ -33,12 +33,14 @@ public class GameUnoStage extends Stage {
 
         GameUnoController controller = loader.getController();
         controller.initPlayer(playerName, currentImage);
-        controller.prueba();
+        controller.setPlayerImage();
+        controller.setPlayerNickname();
 
         Scene scene = new Scene(root);
         // Configuring the stage
         setTitle("EISC Uno"); // Sets the title of the stage
         setScene(scene); // Sets the scene for the stage
+        setFullScreen(true); // <-- Pantalla completa
         setResizable(false); // Disallows resizing of the stage
         show(); // Displays the stage
     }
@@ -58,7 +60,7 @@ public class GameUnoStage extends Stage {
      * @return the singleton instance of GameUnoStage.
      * @throws IOException if an error occurs while creating the instance.
      */
-    public static GameUnoStage getInstance(String playerName, Image currentImage) throws IOException {
+    public static GameUnoStage getInstance(String playerName, String currentImage) throws IOException {
         return GameUnoStageHolder.INSTANCE != null ?
                 GameUnoStageHolder.INSTANCE :
                 (GameUnoStageHolder.INSTANCE = new GameUnoStage(playerName,currentImage));
