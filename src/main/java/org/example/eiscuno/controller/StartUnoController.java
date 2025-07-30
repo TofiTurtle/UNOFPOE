@@ -44,7 +44,7 @@ public class StartUnoController {
         //deserializamos pa coger los datos
         GameState gameState = (GameState) serializableFileHandler.deserialize("game_data.ser");
         System.out.println(gameState.getCardOnTable().getValue() + gameState.getCardOnTable().getColor());
-        //fragmento de codigo para imprimir cartas de jugador y verificar
+        //fragmento de codigo para imprimir cartas de jugador y verificar -> FUNCIONA!!
         ArrayList<Card> playerCardsP = gameState.getPlayerCards();
         for (Card card : playerCardsP) {
             System.out.println(card.getValue() + " " + card.getColor());

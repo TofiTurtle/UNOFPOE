@@ -137,6 +137,8 @@ public class GameUnoController {
         //implementacion de serializable
         serializableFileHandler = new SerializableFileHandler();
 
+        //aqui supuestamente ya se inicializo todou, guardamos partida
+        saveGame();
 
     }
 
@@ -166,7 +168,7 @@ public class GameUnoController {
     public void setPlayerNickname() {
         playerNickname.setText(playerName);
     }
-    private void saveGame(){
+    public void saveGame(){
         ArrayList<Card> PlayerCards = humanPlayer.getCardsPlayer();
         ArrayList<Card> machineCards =  machinePlayer.getCardsPlayer();
         ArrayList<Card> deckCards = deck.getCards();
@@ -256,6 +258,7 @@ public class GameUnoController {
                      */
                         if (card.isSpecial()) { //si ES especial
                             Platform.runLater(() -> handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
+                            saveGame(); //guarda partida. (tiro carta)
                             //Ese codigo se ejecute despues de que JavaFX haya terminado de procesar eventos actuales y no crashee con la animacion
                         } else { //si no es especial... (normal )
                             threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
@@ -308,6 +311,7 @@ public class GameUnoController {
                             // Volvemos al hilo de la interfaz para modificar componentes visuales
                             Platform.runLater(() -> {
                                 Card penaltyCard = deck.takeCard();
+                                saveGame();
                                 humanPlayer.getCardsPlayer().add(penaltyCard); // Lógica del juego
 
                                 // Hacemos la animación desde el mazo hasta la mano del jugador
@@ -365,6 +369,7 @@ public class GameUnoController {
                             Platform.runLater(() -> {
                                 if (e.getPenalizedEntity().equals("MACHINE")) {
                                     machinePlayer.addCard(deck.takeCard());
+                                    saveGame();
 
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                     alert.setTitle("Penalización a la Máquina");
@@ -473,6 +478,7 @@ public class GameUnoController {
                     false, // no es máquina
                     () -> {
                         humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+                        saveGame(); //guarda partida
                         imageViewDeck.setOpacity(0.5);
                         buttonDeck.setDisable(true);
                         threadPlayMachine.setHasPlayerPlayed(true);
@@ -489,6 +495,7 @@ public class GameUnoController {
                     false, // no es máquina
                     () -> {
                         humanPlayer.addCard(deck.takeCard()); //se lo sumamos al humano
+                        saveGame();
                         imageViewDeck.setOpacity(0.5);
                         threadPlayMachine.setHasPlayerPlayed(true);
                         printCardsHumanPlayer();
@@ -517,6 +524,7 @@ public class GameUnoController {
 
             //Penalizamos a la máquina
             machinePlayer.addCard(deck.takeCard());
+            saveGame();
 
             //Actualiza la vista de la maquina de inmediato
             printCardsMachinePlayer();
