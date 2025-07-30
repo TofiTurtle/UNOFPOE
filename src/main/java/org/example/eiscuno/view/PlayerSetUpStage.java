@@ -23,23 +23,38 @@ public class PlayerSetUpStage extends Stage {
         Scene scene = new Scene(root);
         setTitle("Player - Character Selector!");
         setScene(scene);
-        show();
 
+        // ✅ Pantalla completa
+        setFullScreen(true);
+        setFullScreenExitHint("");
+        setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH); // evita que se salga con tecla
+
+        // ❗ Permitir salir solo si tú lo controlas (opcional)
+        scene.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case ESCAPE -> PlayerSetUpStage.deleteInstance(); // si quieres permitir ESC
+            }
+        });
+
+        show();
     }
+
 
     private static class PlayerSetUpHolder {
         private static PlayerSetUpStage INSTANCE;
 
     }
+
     public static PlayerSetUpStage getInstance() throws IOException {
         return PlayerSetUpStage.PlayerSetUpHolder.INSTANCE != null ?
                 PlayerSetUpStage.PlayerSetUpHolder.INSTANCE :
                 (PlayerSetUpStage.PlayerSetUpHolder.INSTANCE = new PlayerSetUpStage());
     }
+
     public static void deleteInstance() {
-        PlayerSetUpHolder.INSTANCE.close();
-        PlayerSetUpHolder.INSTANCE = null;
+        if (PlayerSetUpHolder.INSTANCE != null) {
+            PlayerSetUpHolder.INSTANCE.close();
+            PlayerSetUpHolder.INSTANCE = null;
+        }
     }
-
-
 }
