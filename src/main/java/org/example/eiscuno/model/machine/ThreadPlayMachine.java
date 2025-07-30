@@ -1,6 +1,7 @@
 package org.example.eiscuno.model.machine;
 
 import javafx.application.Platform;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -60,6 +61,7 @@ public class ThreadPlayMachine extends Thread {
                     Platform.runLater(() -> {
                         gameUnoController.getLabelAlertMachine().setText("La maquina arrastró una carta");
                     });
+                    hasPlayerPlayed = false;
                 }
                 else if (cardPlayed.isSpecial()) {
                     // esperamos a que handleSpecialCard termine de ejecutarse en el FX‐thread
@@ -169,16 +171,27 @@ public class ThreadPlayMachine extends Thread {
             gameUnoController.deactivateEmptyDeck();
         }
         else {
-            machinePlayer.addCard(deck.takeCard());
+            Platform.runLater(() -> {
+                // Animación con carta boca abajo para la máquina
+                Image cardBackImage = new Image("/org/example/eiscuno/cards-uno/card_uno.png");
+                Animations.animateCardFromDeck(
+                        cardBackImage,
+                        gameUnoController.imageViewDeck,
+                        gameUnoController.stackPaneCardsMachine,
+                        true, // es máquina
+                        () -> {
+                            // Solo AQUÍ se toma la carta y se agrega, una sola vez
+                            machinePlayer.addCard(deck.takeCard());
 
-            //Actualizar visualmente las cartas de la máquina
-            Platform.runLater(() -> gameUnoController.printCardsMachinePlayer());
+                            gameUnoController.printCardsMachinePlayer();
 
-            //Activar el botón para que el jugador pueda arrastrar
-            Platform.runLater(() -> gameUnoController.imageViewDeck.setOpacity(1));
-            Platform.runLater(() -> gameUnoController.buttonDeck.setDisable(false));
+                            gameUnoController.imageViewDeck.setOpacity(1);
+                            gameUnoController.buttonDeck.setDisable(false);
 
-            setHasPlayerPlayed(false);
+                            setHasPlayerPlayed(false);
+                        }
+                );
+            });
         }
     }
     public boolean getHasPlayerPlay() {
