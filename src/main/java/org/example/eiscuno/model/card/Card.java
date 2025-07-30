@@ -3,17 +3,22 @@ package org.example.eiscuno.model.card;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.io.Serializable;
+
 /**
  * Represents a card in the Uno game.
  */
-public class Card {
+public class Card implements Serializable {
     private String url;
     private String value;
     private String color;
-    private Image image;
-    private ImageView cardImageView;
+    //aparte de implementar serializable, pues practicamente todou lo que se guarda son las cartas
+    //toca etiquetar esto transient ya que NO se puede serializar nada de elementos de javafx
+    //luego con cualquier algoritmo se reconstruyen las cartas, que igual almacenan url,value y color xd
+    private transient Image image;
+    private transient ImageView cardImageView;
     private final String originalColor;
-    private static final Image backImage = new Image(Card.class.getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
+    private static transient final Image backImage = new Image(Card.class.getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
 
     /**
      * Constructs a Card with the specified image URL and name.

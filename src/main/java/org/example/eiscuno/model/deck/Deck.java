@@ -39,9 +39,6 @@ public class Deck {
                     cardEnum.name().equals("FOUR_WILD_DRAW") ||
                     cardEnum.name().equals("WILD")) {
                 Card card = new Card(cardEnum.getFilePath(), getCardValue(cardEnum.name()), getCardColor(cardEnum.name()));
-                System.out.println("Deck" + card.getColor());
-                System.out.println("Deck" + card.getValue());
-                System.out.println("Deck" + card.getCard());
                 deckOfCards.push(card);
             }
         }
@@ -122,10 +119,10 @@ public class Deck {
             throw new IllegalStateException("No hay más cartas en el mazo.");
         }
         Card auxCard = deckOfCards.pop(); //var temporal auxiliar para ver QUE carta agarra
-        System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
+        //System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
 
         //Verificacion de la cantidad de cartas del mazo
-        System.out.println("CARDS REMAINING ON DECK OF CARDS -> : "+ deckOfCards.size());
+        //System.out.println("CARDS REMAINING ON DECK OF CARDS -> : "+ deckOfCards.size());
         return auxCard;
     }
 
@@ -155,6 +152,12 @@ public class Deck {
         deck.addAll(deckOfCards);
         return deck;
     }
+    public ArrayList<Card> getAuxCards() {
+        ArrayList<Card> auxdeck = new ArrayList<>();
+        auxdeck.addAll(AuxdeckOfCards);
+        return auxdeck;
+    }
+
     //implementacion para evitar el fin del juego: NUEVOS METODOS
 
     //metodos getter

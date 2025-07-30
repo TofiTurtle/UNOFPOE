@@ -71,7 +71,7 @@ public class ThreadPlayMachine extends Thread {
                         latch.countDown();
                         //La maquina aqui PUSO una carta ESPECIAL, como PUSO-> la guardamos en el auxiliar
                         deck.PushToAuxDeck(cardPlayed);
-                        System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+                        gameUnoController.saveGame(); //guardamos partida
                     });
                     try {
                         latch.await();
@@ -86,7 +86,7 @@ public class ThreadPlayMachine extends Thread {
                     hasPlayerPlayed = false;
                     //Aqui la maquina tiro una carta NORMAL, como PUSO-> Guardamos en auxiliar
                     deck.PushToAuxDeck(cardPlayed);
-                    System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: "+ deck.getAuxDeckSize());
+                    gameUnoController.saveGame(); //guardamos partida
                 }
 
                 // reactivar UI del jugador
@@ -182,6 +182,7 @@ public class ThreadPlayMachine extends Thread {
                         () -> {
                             // Solo AQUÍ se toma la carta y se agrega, una sola vez
                             machinePlayer.addCard(deck.takeCard());
+                            gameUnoController.saveGame(); //guarda partida
 
                             gameUnoController.printCardsMachinePlayer();
 
