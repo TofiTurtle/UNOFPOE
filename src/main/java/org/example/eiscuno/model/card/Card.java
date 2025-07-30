@@ -56,6 +56,14 @@ public class Card implements Serializable {
         return card;
     }
 
+    public void rebuildCardImageView() {
+        this.image = new Image(String.valueOf(getClass().getResource(url)));
+        this.cardImageView = new ImageView(this.image);
+        cardImageView.setY(16);
+        cardImageView.setFitHeight(90);
+        cardImageView.setFitWidth(70);
+    }
+
     /**
      * Gets the ImageView representation of the card.
      *

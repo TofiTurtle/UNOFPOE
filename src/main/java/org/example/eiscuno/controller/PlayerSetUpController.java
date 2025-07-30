@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.example.eiscuno.model.saveGame.GameState;
 import org.example.eiscuno.model.saveGame.PlainTextFileHandler;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.PlayerSetUpStage;
@@ -89,8 +90,10 @@ public class PlayerSetUpController {
         //Los metemos en el archivo plano -> (este almacenara el nombre y la imagen escogida por el usuario)
         String content = name + "," + currentImage;
         plainTextFileHandler.writeToFile("player_data.csv", content);
+        //Como se es una nueva partida, pero igual debemos pasar tres parametros, hacemos un objeto null
+        GameState gameState = null;
         //se los pasamos al GameUnoStage
-        GameUnoStage.getInstance(name,currentImage);
+        GameUnoStage.getInstance(name,currentImage,gameState);
         PlayerSetUpStage.deleteInstance();
     }
 

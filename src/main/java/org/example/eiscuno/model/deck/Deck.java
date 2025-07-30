@@ -3,6 +3,7 @@ package org.example.eiscuno.model.deck;
 import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 import org.example.eiscuno.model.card.Card;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -11,7 +12,7 @@ import java.util.Stack;
 /**
  * Represents a deck of Uno cards.
  */
-public class Deck {
+public class Deck implements Serializable {
     private Stack<Card> deckOfCards;
     private Stack<Card> AuxdeckOfCards;
 
