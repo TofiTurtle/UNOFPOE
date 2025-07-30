@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/images/player3.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game_data.ser" beforeDir="false" afterPath="$PROJECT_DIR$/game_data.ser" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/player_data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/player_data.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/card/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/card/Card.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/view/GameUnoStage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/view/GameUnoStage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/PlayerSetUpController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/PlayerSetUpController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,11 +95,11 @@
       <recent name="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\HP\Desktop\eisc-uno\src\main\resources\org\example\eiscuno\images" />
       <recent name="C:\Users\user\Desktop\UNOFPOE\src\main\resources\org\example\eiscuno\images" />
       <recent name="$PROJECT_DIR$/src/main/resources/org/example/eiscuno" />
       <recent name="C:\Users\fsvc1\Coding\eisc-uno\src\main\resources\org\example\eiscuno" />
       <recent name="C:\Users\fsvc1\Coding\eisc-uno\src\main\resources\org\example\eiscuno\images" />
-      <recent name="C:\Users\fsvc1\Coding\eisc-uno\src" />
     </key>
   </component>
   <component name="RunManager">
