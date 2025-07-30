@@ -146,12 +146,19 @@ public class GameUnoController {
      * Initializes the variables for the game.
      */
     private void initVariables() {
-        this.humanPlayer = new Player("HUMAN_PLAYER");
-        this.machinePlayer = new Player("MACHINE_PLAYER");
-        this.deck = new Deck();
-        this.table = new Table();
-        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
-        this.posInitCardToShow = 0;
+        if(gameState == null)
+        {
+            this.humanPlayer = new Player("HUMAN_PLAYER");
+            this.machinePlayer = new Player("MACHINE_PLAYER");
+            this.deck = new Deck();
+            this.table = new Table();
+            this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+            this.posInitCardToShow = 0;
+        }else{
+            System.out.println("cargando nueva partida!!!!!!!!!!!!!!!!!");
+
+        }
+
 
     }
 
@@ -167,9 +174,9 @@ public class GameUnoController {
         {
             System.out.println("nueva partida");
         }else{
-            System.out.println("Carta en Mesa" + gameState.getCardOnTable().getValue() + gameState.getCardOnTable().getColor());
+            System.out.println("Carta en Mesa" + gameState.getTable().getCurrentCardOnTheTable().getValue() + gameState.getTable().getCurrentCardOnTheTable().getColor());
             //fragmento de codigo para imprimir cartas de jugador y verificar -> FUNCIONA!!
-            ArrayList<Card> playerCardsP = gameState.getPlayerCards();
+            ArrayList<Card> playerCardsP = gameState.getHumanPlayer().getCardsPlayer();
             for (Card card : playerCardsP) {
                 System.out.println(card.getValue() + " " + card.getColor());
             }
@@ -184,6 +191,7 @@ public class GameUnoController {
         playerNickname.setText(playerName);
     }
     public void saveGame(){
+        /*
         ArrayList<Card> PlayerCards = humanPlayer.getCardsPlayer();
         ArrayList<Card> machineCards =  machinePlayer.getCardsPlayer();
         ArrayList<Card> deckCards = deck.getCards();
@@ -196,6 +204,15 @@ public class GameUnoController {
                 cardOnTable
         );
 
+        serializableFileHandler.serialize("game_data.ser", gameState);
+        System.out.println("Si se guardo manito, calma! :)))");
+        */
+        Player humanPlayerS = humanPlayer;
+        Player machinePlayerS = machinePlayer;
+        Deck deckS = deck;
+        Table tableS = table;
+
+        GameState gameState = new GameState(humanPlayer, machinePlayer, deck, table);
         serializableFileHandler.serialize("game_data.ser", gameState);
         System.out.println("Si se guardo manito, calma! :)))");
 
