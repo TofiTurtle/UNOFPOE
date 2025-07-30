@@ -85,12 +85,12 @@ public class PlayerSetUpController {
     void startGame(ActionEvent event) throws IOException {
         //Para el gameUnostage, le pasaremos el nombre y la imagen que se escogio
         String name = textField.getText().trim();
-        Image currentImage = images.get(currentIndex);
+        String currentImage = PathListImages[currentIndex];
         //Los metemos en el archivo plano -> (este almacenara el nombre y la imagen escogida por el usuario)
         String content = name + "," + currentImage;
         plainTextFileHandler.writeToFile("player_data.csv", content);
         //se los pasamos al GameUnoStage
-        GameUnoStage.getInstance(name,images.get(currentIndex));
+        GameUnoStage.getInstance(name,currentImage);
         PlayerSetUpStage.deleteInstance();
     }
 

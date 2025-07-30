@@ -21,7 +21,7 @@ public class GameUnoStage extends Stage {
      *
      * @throws IOException if an error occurs while loading the FXML file for the game interface.
      */
-    public GameUnoStage(String playerName, Image currentImage) throws IOException {
+    public GameUnoStage(String playerName, String currentImage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/game-uno-view.fxml"));
         AnchorPane root;
         try {
@@ -59,7 +59,7 @@ public class GameUnoStage extends Stage {
      * @return the singleton instance of GameUnoStage.
      * @throws IOException if an error occurs while creating the instance.
      */
-    public static GameUnoStage getInstance(String playerName, Image currentImage) throws IOException {
+    public static GameUnoStage getInstance(String playerName, String currentImage) throws IOException {
         return GameUnoStageHolder.INSTANCE != null ?
                 GameUnoStageHolder.INSTANCE :
                 (GameUnoStageHolder.INSTANCE = new GameUnoStage(playerName,currentImage));

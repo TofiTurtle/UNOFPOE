@@ -3,6 +3,8 @@ package org.example.eiscuno.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import org.example.eiscuno.model.saveGame.PlainTextFileHandler;
+import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.PlayerSetUpStage;
 import org.example.eiscuno.view.StartUnoView;
 
@@ -23,11 +25,19 @@ public class StartUnoController {
     void exitGame(ActionEvent event) {
         StartUnoView.deleteInstance();
     }
+    //creamos variable de plaintext
+    private PlainTextFileHandler plainTextFileHandler = new PlainTextFileHandler();
+
 
     //boton para Continuar partida(falta)
     @FXML
-    void loadGame(ActionEvent event) {
-        //implementacion de nueva partida.
+    void loadGame(ActionEvent event) throws IOException {
+        String[] data = plainTextFileHandler.readFromFile("player_data.csv");
+        String playerName = data[0]; // Player name
+        String characterImagePath = data[1]; // Character image path
+
+
+        GameUnoStage.getInstance(playerName,characterImagePath);
     }
 
     //boton de ir a playersetup

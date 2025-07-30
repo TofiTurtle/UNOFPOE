@@ -82,7 +82,7 @@ public class GameUnoController {
     private Map<Card, ImageView> machineCardViews = new HashMap<>();
 
     private String playerName;
-    private Image currentImage;
+    private String currentImage;
 
     /**
      * Initializes the controller.
@@ -140,14 +140,14 @@ public class GameUnoController {
 
     }
 
-    public void initPlayer(String playerName, Image currentImage) {
+    public void initPlayer(String playerName, String currentImage) {
         this.playerName = playerName;
         this.currentImage = currentImage;
         // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
     }
     //metodo pa ponerle la imagen al jugador
     public void setPlayerImage() {
-        playerImage.setImage(currentImage);
+        playerImage.setImage(new Image(getClass().getResourceAsStream(currentImage)));
     }
     public void setPlayerNickname() {
         playerNickname.setText(playerName);
