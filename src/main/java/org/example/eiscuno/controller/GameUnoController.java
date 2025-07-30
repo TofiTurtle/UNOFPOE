@@ -97,10 +97,23 @@ public class GameUnoController {
      */
     @FXML
     public void initialize() {
+        /*initialize siempre se ejecuta independientemente de la version
+        Por esta razon se ponen estos dos elementos aca, que independientemente
+        de la version siempre van*/
         labelAlertMachine.setText("");
-        initVariables();
+        serializableFileHandler = new SerializableFileHandler();
 
-
+    }
+    /*Este metodo es literalmente el mismo initialize, combinado con el initvariables
+    * */
+    public void setupNewGame(){
+        System.out.println("Cargando una NUEVA PARTIDA");
+        this.humanPlayer = new Player("HUMAN_PLAYER");
+        this.machinePlayer = new Player("MACHINE_PLAYER");
+        this.deck = new Deck();
+        this.table = new Table();
+        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+        this.posInitCardToShow = 0;
 
         //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
         while(!initialValidCard) //mientras que NO sea una carta inicial valida, se repetira...
@@ -134,54 +147,73 @@ public class GameUnoController {
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck ,this, machineCardViews, stackPaneCardsMachine);
         threadPlayMachine.start();
 
-        //implementacion de serializable
-        serializableFileHandler = new SerializableFileHandler();
+        //aqui supuestamente ya se inicializo todou, guardamos partida
+        saveGame();
+    }
+    /*
+    Ahora, en este metodo lo que hacemos es que a nuestras variables del juego, le pasaamos lo almacenado
+    en nuestro objeto gamestate
+     */
+    public void loadSavedGame() {
+        System.out.println("cargando una PARTIDA YA INICIADA CONTINUADA");
+        this.humanPlayer = gameState.getHumanPlayer();
+        this.machinePlayer = gameState.getMachinePlayer();
+        this.deck = gameState.getDeck();
+        this.table = gameState.getTable();
+        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+
+        /*Aqui lo que se hace es restaurar visualmente TODAS las cartas
+        * (player, machine, deck y auxdeck)
+        * Esto debido a que pues tenemos que serializar la clase Card, y debido a que esta
+        * tiene vainas visuales, pues no deja, entonces toca hacer que ese aspecto de la carta
+        * no se guarde, aunque como poseemos la url, despues de deserializar restauramos con este metodo
+        * */
+        for (Card c : humanPlayer.getCardsPlayer()) {
+            c.rebuildCardImageView();
+        }
+        for (Card c : machinePlayer.getCardsPlayer()) {
+            c.rebuildCardImageView();
+        }
+        for (Card c : deck.getCards()) {
+            c.rebuildCardImageView();
+        }
+        for (Card c : deck.getAuxCards()) {
+            c.rebuildCardImageView();
+        }
+
+        //colocamos la carta del centro, la que se esta jugando.
+        table.addCardOnTheTable(table.getCurrentCardOnTheTable()); //ponemos la carta en la table
+        tableImageView.setImage(table.getCurrentCardOnTheTable().getImage()); //ponemos la IMAGEN de esta
+        //imprimimos las cartas de los jugadores
+        printCardsHumanPlayer();
+        printCardsMachinePlayer();
+
+        //e igualmente creamos los hilos, pasando como parametro pues ya los datos guardados del gamesttte
+        threadSingUNOMachine = new ThreadSingUNOMachine(humanPlayer.getCardsPlayer(), this);
+        Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
+        t.start();
+
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck ,this, machineCardViews, stackPaneCardsMachine);
+        threadPlayMachine.start();
 
         //aqui supuestamente ya se inicializo todou, guardamos partida
         saveGame();
 
     }
 
-    /**
-     * Initializes the variables for the game.
-     */
-    private void initVariables() {
-        if(gameState == null)
-        {
-            this.humanPlayer = new Player("HUMAN_PLAYER");
-            this.machinePlayer = new Player("MACHINE_PLAYER");
-            this.deck = new Deck();
-            this.table = new Table();
-            this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
-            this.posInitCardToShow = 0;
-        }else{
-            System.out.println("cargando nueva partida!!!!!!!!!!!!!!!!!");
-
-        }
-
-
-    }
 
     //ESTOS METODOS DE ACA SON PURAMENTE PARA PONERLE LA IMAGEN Y NOMBRE SELECCIONADO AL JUGADOR!!!
     public void initPlayer(String playerName, String currentImage, GameState gameState) {
         this.playerName = playerName;
         this.currentImage = currentImage;
         this.gameState = gameState;
-        // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
-    }
-    public void prueba(){
-        if(gameState==null)
-        {
-            System.out.println("nueva partida");
-        }else{
-            System.out.println("Carta en Mesa" + gameState.getTable().getCurrentCardOnTheTable().getValue() + gameState.getTable().getCurrentCardOnTheTable().getColor());
-            //fragmento de codigo para imprimir cartas de jugador y verificar -> FUNCIONA!!
-            ArrayList<Card> playerCardsP = gameState.getHumanPlayer().getCardsPlayer();
-            for (Card card : playerCardsP) {
-                System.out.println(card.getValue() + " " + card.getColor());
-            }
-        }
 
+        if(this.gameState==null){
+            setupNewGame();
+        }else{
+            loadSavedGame();
+        }
+        // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
     }
     //metodo pa ponerle la imagen al jugador
     public void setPlayerImage() {
@@ -191,31 +223,12 @@ public class GameUnoController {
         playerNickname.setText(playerName);
     }
     public void saveGame(){
-        /*
-        ArrayList<Card> PlayerCards = humanPlayer.getCardsPlayer();
-        ArrayList<Card> machineCards =  machinePlayer.getCardsPlayer();
-        ArrayList<Card> deckCards = deck.getCards();
-        ArrayList<Card> auxdeckCards = deck.getAuxCards();
-        Card cardOnTable = table.getCurrentCardOnTheTable();
-
-        GameState gameState = new GameState(
-                PlayerCards, machineCards,
-                deckCards, auxdeckCards,
-                cardOnTable
-        );
-
-        serializableFileHandler.serialize("game_data.ser", gameState);
-        System.out.println("Si se guardo manito, calma! :)))");
-        */
-        Player humanPlayerS = humanPlayer;
-        Player machinePlayerS = machinePlayer;
-        Deck deckS = deck;
-        Table tableS = table;
-
+        //guardamos la partida con los objetos del juego:
         GameState gameState = new GameState(humanPlayer, machinePlayer, deck, table);
+        //serializamos
         serializableFileHandler.serialize("game_data.ser", gameState);
+        //verificacion
         System.out.println("Si se guardo manito, calma! :)))");
-
     }
 
 
