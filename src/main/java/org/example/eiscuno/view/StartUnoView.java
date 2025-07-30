@@ -23,7 +23,20 @@ public class StartUnoView extends Stage {
         Scene scene = new Scene(root);
         setTitle("EISC Uno");
         setScene(scene);
+        setFullScreen(true); // ✅ Pantalla completa
+        setFullScreenExitHint(""); // ❌ No mostrar mensaje de "Presione ESC para salir"
+        setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH); // ❌ Desactiva salir con tecla
         show();
+
+        // ✅ Pero nosotros escuchamos la tecla ESC para cerrar (si se desea)
+        scene.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case ESCAPE -> {
+                    // Comentar esta línea si no quieres que Escape cierre
+                    StartUnoView.deleteInstance();
+                }
+            }
+        });
 
     }
 
@@ -39,9 +52,9 @@ public class StartUnoView extends Stage {
     }
 
     public static void deleteInstance() {
-        StartUnoViewHolder.INSTANCE.close();
-        StartUnoViewHolder.INSTANCE = null;
+        if (StartUnoViewHolder.INSTANCE != null) {
+            StartUnoViewHolder.INSTANCE.close();
+            StartUnoViewHolder.INSTANCE = null;
+        }
     }
-
-
 }
