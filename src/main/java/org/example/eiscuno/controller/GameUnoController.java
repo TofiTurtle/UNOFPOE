@@ -283,9 +283,10 @@ public class GameUnoController {
                         //System.out.println("CARTA ACTUAL EN LA MESA: " + table.getCurrentCardOnTheTable());
                         //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
                         if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
-                            unoCheckStarted = true; //Evita que se lance mas de una vez
-                            checkUNO("PLAYER"); //Simula que la maquina espera a ver si el jugador dice uno
+                            unoCheckStarted = true;
+                            playerSaidUNO = false; // ← importante reiniciar bandera
                         }
+
 
                         //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                         //y este pueda seguir tomando cartas
@@ -325,74 +326,13 @@ public class GameUnoController {
 
 
     /**
-     * Este metodo verifica quién dice "UNO" primero: el jugador o la máquina.
-     * Dependiendo del parámetro "who", maneja los dos casos:
-     * - Si es "PLAYER", se espera que el jugador diga UNO antes que la máquina.
      * - Si es "MACHINE", se espera que el jugador acuse a la máquina antes de que ella lo diga.
      *
      *  @param who Cadena que representa quién tiene una carta. Puede ser "PLAYER" o "MACHINE".
      *  */
     private void checkUNO(String who) {
-
-        //Primer caso: Es el jugador quien tiene solo una carta
-        if (who.equals("PLAYER")) {
-            unoCheckStarted = true;//Se activa la bandera que indica que ya estamos revisando si el jugador dice UNO
-            playerSaidUNO = false;  // ← Reiniciar bandera para evitar heredar valor anterior
-            System.out.println("El jugador tiene solo una carta, esperando quién dice UNO primero...");
-
-            new Thread(() -> { //Creamos un nuevo hilo para no bloquear la interfaz gráfica
-                try {
-                    //Esperamos entre 1 y 3 segundos (simula el tiempo que tarda la máquina en decir UNO)
-                    int delay = 1000 + new Random().nextInt(2000);
-                    Thread.sleep(delay);
-
-                    //Si el jugador NO dijo UNO en ese tiempo, es penalizado
-                    if (!playerSaidUNO) {
-                        try {
-                            //Excepcion marcada
-                            throw new PenaltyException("El jugador no dijo UNO a tiempo.", "PLAYER");
-                        } catch (PenaltyException e) {
-
-                            // Volvemos al hilo de la interfaz para modificar componentes visuales
-                            Platform.runLater(() -> {
-                                Card penaltyCard = deck.takeCard();
-                                saveGame();
-                                humanPlayer.getCardsPlayer().add(penaltyCard); // Lógica del juego
-
-                                // Hacemos la animación desde el mazo hasta la mano del jugador
-                                Animations.animateCardFromDeck(
-                                        Card.getBackImage(),            // Imagen boca abajo
-                                        imageViewDeck,                  // Nodo de origen (mazo)
-                                        stackPaneCardsPlayer,          // Nodo destino (mano del jugador)
-                                        false,                          // false porque no es la máquina
-                                        () -> printCardsHumanPlayer()  // Acción que actualiza la mano
-                                );
-
-                                // Mostramos la alerta
-                                Alert alert = new Alert(Alert.AlertType.WARNING);
-                                alert.setTitle("UNO");
-                                alert.setHeaderText("¡La máquina dijo UNO primero!");
-                                alert.setContentText("Has sido penalizado con una carta.");
-                                alert.showAndWait();
-                            });
-                        }
-                    } else {
-                        // Si el jugador dijo UNO a tiempo, no pasa nada
-                        System.out.println("El jugador dijo UNO a tiempo.");
-                    }
-
-                    // Reiniciamos las banderas para que pueda volver a usarse el sistema
-                    playerSaidUNO = false;
-                    unoCheckStarted = false;
-
-                } catch (InterruptedException e) {
-                    // Capturamos cualquier interrupción del hilo
-                    e.printStackTrace();
-                }
-            }).start();
-
             //Segundo caso: Es la máquina quien tiene una sola carta
-        } else if (who.equals("MACHINE")) {
+        if (who.equals("MACHINE")) {
             unoCheckMachineStarted = true; //Activamos la bandera de que estamos esperando si la máquina dice UNO
             machineSaidUNO = false; // Reiniciar bandera aquí para evitar que herede el valor anterior
             System.out.println("La máquina tiene solo una carta. Esperando si el jugador le canta...");
@@ -765,5 +705,8 @@ public class GameUnoController {
 
     public Label getLabelAlertMachine() {
         return labelAlertMachine;
+    }
+    public void setUnoCheckMachineStarted(boolean value) {
+        this.unoCheckMachineStarted = value;
     }
 }
