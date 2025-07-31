@@ -105,20 +105,6 @@ public class GameUno implements IGameUno {
         return cards;
     }
 
-    //una copia de el metodo para mostrar las cartas del jugador, solo que para la maquina no necesitamos movernos entonces no usamos posInitCardToShow
-    public Card[] getCurrentVisibleCardsMachinePlayer() {
-        int totalCards = this.machinePlayer.getCardsPlayer().size();
-        int numVisibleCards = Math.min(4, totalCards);
-        Card[] cards = new Card[numVisibleCards];
-
-        for (int i = 0; i < numVisibleCards; i++) {
-            cards[i] = this.machinePlayer.getCard( i);
-        }
-
-        return cards;
-    }
-
-
     /**
      * Checks if the game is over.
      *
