@@ -36,3 +36,5 @@ build/
 
 ### Mac OS ###
 .DS_Storegame_data.ser
+.idea/
+.idea/

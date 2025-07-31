@@ -10,6 +10,13 @@ import org.example.eiscuno.model.player.Player;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Thread that handles the UNO calling mechanism for the machine player.
+ * <p>
+ * This thread simulates the machine player's reaction time when calling UNO
+ * and applies penalties if the machine fails to call UNO when required.
+ * </p>
+ */
 public class ThreadSingUNOPlayer extends Thread {
 
     private final GameUnoController controller;
@@ -17,21 +24,37 @@ public class ThreadSingUNOPlayer extends Thread {
     private final List<Card> machineCards;
     private final Deck deck;
 
-    public ThreadSingUNOPlayer(GameUnoController controller, Player machinePlayer, List<Card> machineCards, Deck deck) {
+    /**
+     * Constructs a new ThreadSingUNOPlayer with the specified game components.
+     *
+     * @param controller the main game controller
+     * @param machinePlayer the machine player instance
+     * @param machineCards the list of cards held by the machine player
+     * @param deck the game deck
+     */
+    public ThreadSingUNOPlayer(GameUnoController controller, Player machinePlayer,
+                               List<Card> machineCards, Deck deck) {
         this.controller = controller;
         this.machinePlayer = machinePlayer;
         this.machineCards = machineCards;
         this.deck = deck;
     }
 
+    /**
+     * Main execution method for the thread.
+     * <p>
+     * Simulates the machine player's reaction time and checks if UNO was called properly,
+     * applying penalties if necessary.
+     * </p>
+     */
     @Override
     public void run() {
         try {
-            // Simular tiempo de reacción de la máquina
+            // Simulate machine reaction time (1-3 seconds)
             int delay = 1000 + new Random().nextInt(2000);
             Thread.sleep(delay);
 
-            // Si la máquina todavía no dijo UNO y el jugador no la acusó
+            // Check if machine hasn't called UNO and wasn't challenged by human player
             if (!controller.isMachineSaidUNO()) {
                 Platform.runLater(() -> {
                     try {
@@ -42,7 +65,7 @@ public class ThreadSingUNOPlayer extends Thread {
                     }
                 });
             } else {
-                // Penalizar a la máquina si no dijo UNO
+                // Penalize machine for not calling UNO in time
                 Platform.runLater(() -> {
                     try {
                         throw new PenaltyException("La máquina no dijo UNO a tiempo.", "MACHINE");
@@ -56,7 +79,7 @@ public class ThreadSingUNOPlayer extends Thread {
                 });
             }
 
-            // Al terminar, se resetean las banderas
+            // Reset flags after processing
             controller.setUnoCheckMachineStarted(false);
 
         } catch (InterruptedException e) {

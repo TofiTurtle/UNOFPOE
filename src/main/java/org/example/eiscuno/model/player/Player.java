@@ -8,7 +8,7 @@ import java.util.ArrayList;
 /**
  * Represents a player in the Uno game.
  */
-public class Player implements IPlayer, Serializable {
+public class Player extends PlayerAdapter implements Serializable {
     private ArrayList<Card> cardsPlayer;
     private String typePlayer;
 
@@ -61,7 +61,4 @@ public class Player implements IPlayer, Serializable {
         return cardsPlayer.get(index);
     }
 
-    public String getTypePlayer() {
-        return typePlayer;
-    }
 }
