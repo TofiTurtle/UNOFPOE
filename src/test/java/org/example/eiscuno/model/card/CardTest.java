@@ -22,19 +22,16 @@ class CardTest {
         Platform.startup(latch::countDown);
         latch.await();
     }
-    
-
-    @Test
-    void isSpecial_shouldReturnFalse_forNormalCard() {
-        String url = "/org/example/eiscuno/cards-uno/3_green.png";
-        Card card = new Card(url, "3", "GREEN");
-        assertFalse(card.isSpecial());
-    }
 
     @Test
     void originalColorShouldStillWork_afterChangingCardColor() {
         String url = "/org/example/eiscuno/cards-uno/3_green.png";
-        Card card = new Card(url, "3", "GREEN");
+        Card card = new Card(url, "3", "GREEN") {
+            @Override
+            public boolean isSpecial() {
+                return false;
+            }
+        };
         String originalColor = card.getColor();
         card.setColor("BLUE");
         assertEquals(card.getOriginalColor(), originalColor);
