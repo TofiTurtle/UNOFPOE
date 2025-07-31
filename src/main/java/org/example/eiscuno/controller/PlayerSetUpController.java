@@ -15,6 +15,10 @@ import org.example.eiscuno.view.StartUnoView;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Controller class for the player setup screen in UNO game.
+ * Handles player avatar selection, name input, and game initialization.
+ */
 public class PlayerSetUpController {
     @FXML
     private ImageView imageView;
@@ -24,82 +28,106 @@ public class PlayerSetUpController {
     private Label emptyNameLabel;
     private List<Image> images;
     private int currentIndex = 2;
-    //Implementacion de archivos planos:
+
+    // File handler for player data persistence
     private PlainTextFileHandler plainTextFileHandler;
-    //necesitamos este arreglo para poder pasar la imagen despues
-    private String PathListImages[] = { "/org/example/eiscuno/images/player1.jpg", "/org/example/eiscuno/images/player2.jpg", "/org/example/eiscuno/images/player3.jpg",
+
+    // Array containing paths to available player images
+    private String PathListImages[] = { "/org/example/eiscuno/images/player1.jpg",
+            "/org/example/eiscuno/images/player2.jpg",
+            "/org/example/eiscuno/images/player3.jpg",
             "/org/example/eiscuno/images/player4.png"};
 
-
-    @FXML //que este codigo se ejecute siempre cuando se inice
+    /**
+     * Initializes the controller class.
+     * Sets up the initial player avatar and text field listener.
+     */
+    @FXML
     public void initialize() {
+        // Listener for text field changes to hide empty name warning
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.trim().isEmpty()) {
-                emptyNameLabel.setVisible(false); // mira si esta vacio para mostrar el mensaje de ingresar nombre
+                emptyNameLabel.setVisible(false);
             }
         });
-        //Lista que contiene las imagenes disponibles (falta agregarlas)
+
+        // Load all available player images
         images = List.of(
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player1.jpg")),
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player2.jpg")),
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player3.jpg")),
                 new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player4.png"))
         );
-        imageView.setImage(images.get(currentIndex)); //iniiclamente se pone una imagen x cualquiera
+
+        // Set default image
+        imageView.setImage(images.get(currentIndex));
         plainTextFileHandler = new PlainTextFileHandler();
     }
 
-    //Metodos para cambiar de imagen y asi el jugador pueda escoger la que desee
+    /**
+     * Cycles to the next available player avatar image.
+     * Wraps around to the first image when reaching the end.
+     */
     @FXML
     private void nextImage() {
-        if (currentIndex < images.size() - 1) {  //si es menor que el tamaño-1 (recordar listas van desde 0)
-            currentIndex++; //suma a la variable currenIndex (imgen que se muestra actualmente=
-            imageView.setImage(images.get(currentIndex)); //se pone visualmente
-        } else { //si NO es menor (osea, es igual a 3), ya esta en la cola, por lo que con el siguiente click
-            currentIndex = 0; //pasa a la cabeza de la lsita de imagenes.
-            imageView.setImage(images.get(currentIndex)); //se pone visualmente
+        if (currentIndex < images.size() - 1) {
+            currentIndex++;
+            imageView.setImage(images.get(currentIndex));
+        } else {
+            currentIndex = 0;
+            imageView.setImage(images.get(currentIndex));
         }
     }
 
+    /**
+     * Cycles to the previous available player avatar image.
+     * Wraps around to the last image when reaching the beginning.
+     */
     @FXML
     private void previousImage() {
         if (currentIndex > 0) {
             currentIndex--;
             imageView.setImage(images.get(currentIndex));
-
-        }else {
+        } else {
             currentIndex = images.size() - 1;
             imageView.setImage(images.get(currentIndex));
         }
     }
 
-
-
-
-    //metodos existentes de botones iniciales-------------------
+    /**
+     * Handles the back button action.
+     * Returns to the game's start screen.
+     *
+     * @param event The action event triggered by the button
+     * @throws IOException if there's an error loading the start view
+     */
     @FXML
     void goBackToStart(ActionEvent event) throws IOException {
         StartUnoView.getInstance();
         PlayerSetUpStage.deleteInstance();
     }
+
+    /**
+     * Handles the game start button action.
+     * Saves player data and launches the main game screen.
+     *
+     * @param event The action event triggered by the button
+     * @throws IOException if there's an error saving player data or loading the game
+     */
     @FXML
     void startGame(ActionEvent event) throws IOException {
-        //Para el gameUnostage, le pasaremos el nombre y la imagen que se escogio
         String name = textField.getText().trim();
         String currentImage = PathListImages[currentIndex];
-        //Los metemos en el archivo plano -> (este almacenara el nombre y la imagen escogida por el usuario)
+
+        // Save player data to file (name and selected image path)
         String content = name + "," + currentImage;
         plainTextFileHandler.writeToFile("player_data.csv", content);
-        //Como se es una nueva partida, pero igual debemos pasar tres parametros, hacemos un objeto null
+
+        // Initialize new game state (null indicates new game)
         GameState gameState = null;
-        //se los pasamos al GameUnoStage
-        GameUnoStage.getInstance(name,currentImage,gameState);
+
+        // Launch main game screen with player data
+        GameUnoStage.getInstance(name, currentImage, gameState);
         PlayerSetUpStage.deleteInstance();
     }
-
-
-
-
-
-
 }

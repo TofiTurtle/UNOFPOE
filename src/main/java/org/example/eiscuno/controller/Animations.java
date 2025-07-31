@@ -17,85 +17,104 @@ import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.player.Player;
 
+/**
+ * Utility class for handling all card animations in the UNO game.
+ * Provides methods for playing cards, dealing cards from deck, and animating card eating.
+ */
 public class Animations {
 
-    //Metodo para hacer que una carta se arrastre desde su posicion al centro de la mesa
+    /**
+     * Plays the animation of a card moving from its current position to the center of the table.
+     *
+     * @param card The card object being animated
+     * @param cardImageView The ImageView of the card to animate
+     * @param tableImageView The ImageView representing the table center
+     * @param onAnimationFinished Runnable to execute after animation completes
+     */
     public static void playCardAnimation(
             Card card,
             ImageView cardImageView,
             ImageView tableImageView,
             Runnable onAnimationFinished
     ) {
-        // 1. Crear duplicado de la carta
+        // 1. Create card duplicate for animation
         ImageView animatedCard = new ImageView(card.getImage());
         animatedCard.setFitWidth(cardImageView.getFitWidth());
         animatedCard.setFitHeight(cardImageView.getFitHeight());
 
-        // 2. Obtener posición inicial
+        // 2. Get initial position
         Bounds startBounds = cardImageView.localToScene(cardImageView.getBoundsInLocal());
         animatedCard.setTranslateX(startBounds.getMinX());
         animatedCard.setTranslateY(startBounds.getMinY());
 
-        // 3. Agregar a la escena
+        // 3. Add to scene
         Scene scene = cardImageView.getScene();
         Pane root = (Pane) scene.getRoot();
         root.getChildren().add(animatedCard);
 
-        // 4. Calcular destino (centro de la mesa)
+        // 4. Calculate destination (table center)
         Bounds endBounds = tableImageView.localToScene(tableImageView.getBoundsInLocal());
         double endX = endBounds.getMinX() + tableImageView.getFitWidth() / 2 - cardImageView.getFitWidth() / 2;
         double endY = endBounds.getMinY() + tableImageView.getFitHeight() / 2 - cardImageView.getFitHeight() / 2;
 
-        // 5. Crear y configurar transición
+        // 5. Create and configure transition
         TranslateTransition transition = new TranslateTransition(Duration.millis(500), animatedCard);
         transition.setToX(endX);
         transition.setToY(endY);
         transition.setInterpolator(Interpolator.EASE_OUT);
 
-        // 6. Lógica al finalizar la animación
+        // 6. Animation completion logic
         transition.setOnFinished(event -> {
             tableImageView.setImage(card.getImage());
             root.getChildren().remove(animatedCard);
 
-            // Ejecutar lógica adicional (guardado, efectos, turnos, etc)
+            // Execute additional logic (saving, effects, turns, etc)
             if (onAnimationFinished != null) {
                 Platform.runLater(onAnimationFinished);
             }
         });
 
-        // 7. Ejecutar animación
+        // 7. Play animation
         transition.play();
     }
 
-    //Misma animacion que la de arriba pero para la maquina
+    /**
+     * Plays the animation of a card being played by the machine (AI player).
+     * Similar to playCardAnimation but optimized for machine player.
+     *
+     * @param card The card being played
+     * @param originalCardView The ImageView of the machine's card
+     * @param tableImageView The ImageView representing the table center
+     * @param onAnimationFinished Callback to execute after animation
+     */
     public static void playCardFromMachine(Card card, ImageView originalCardView, ImageView tableImageView, Runnable onAnimationFinished) {
-        // 1. Crear duplicado de la carta
+        // 1. Create card duplicate for animation
         ImageView animatedCard = new ImageView(card.getImage());
         animatedCard.setFitWidth(originalCardView.getFitWidth());
         animatedCard.setFitHeight(originalCardView.getFitHeight());
 
-        // 2. Obtener posición inicial
+        // 2. Get initial position
         Bounds startBounds = originalCardView.localToScene(originalCardView.getBoundsInLocal());
         animatedCard.setTranslateX(startBounds.getMinX());
         animatedCard.setTranslateY(startBounds.getMinY());
 
-        // 3. Agregar a la escena
+        // 3. Add to scene
         Scene scene = originalCardView.getScene();
         Pane root = (Pane) scene.getRoot();
         root.getChildren().add(animatedCard);
 
-        // 4. Calcular destino (centro de la mesa)
+        // 4. Calculate destination (table center)
         Bounds endBounds = tableImageView.localToScene(tableImageView.getBoundsInLocal());
         double endX = endBounds.getMinX() + tableImageView.getFitWidth() / 2 - animatedCard.getFitWidth() / 2;
         double endY = endBounds.getMinY() + tableImageView.getFitHeight() / 2 - animatedCard.getFitHeight() / 2;
 
-        // 5. Crear transición
+        // 5. Create transition
         TranslateTransition transition = new TranslateTransition(Duration.millis(500), animatedCard);
         transition.setToX(endX);
         transition.setToY(endY);
         transition.setInterpolator(Interpolator.EASE_OUT);
 
-        // 6. Al terminar, actualizar imagen en la mesa y limpiar
+        // 6. On completion: update table image and clean up
         transition.setOnFinished(event -> {
             tableImageView.setImage(card.getImage());
             root.getChildren().remove(animatedCard);
@@ -105,11 +124,19 @@ public class Animations {
             }
         });
 
-        // 7. Ejecutar
+        // 7. Play animation
         transition.play();
     }
 
-    //Metodo generico de animacion de el mazo hasta el jugador o la maquina
+    /**
+     * Animates a card moving from the deck to either the player's or machine's hand.
+     *
+     * @param cardImage The image of the card to animate
+     * @param deckImageView The ImageView of the deck
+     * @param targetPane The Pane where the card should land (player or machine)
+     * @param isMachine Flag indicating if animation is for the machine player
+     * @param onFinished Callback to execute after animation completes
+     */
     public static void animateCardFromDeck(
             Image cardImage,
             ImageView deckImageView,
@@ -133,7 +160,7 @@ public class Animations {
         animatedCard.setTranslateX(startBounds.getMinX());
         animatedCard.setTranslateY(startBounds.getMinY());
 
-        // Posición final: mano del jugador o máquina
+        // Final position: player's or machine's hand
         Bounds endBounds = targetPane.localToScene(targetPane.getBoundsInLocal());
 
         double offsetX = Math.random() * 50 - 25;
@@ -157,7 +184,15 @@ public class Animations {
         transition.play();
     }
 
-
+    /**
+     * Animates the process of a player (human or machine) eating/drawing cards from the deck.
+     *
+     * @param player The player who is eating cards
+     * @param count Number of cards to animate
+     * @param isMachine Flag indicating if animation is for the machine player
+     * @param gameUno The game model instance
+     * @param controller The game controller instance
+     */
     public static void animateEatCards(Player player, int count, boolean isMachine, GameUno gameUno, GameUnoController controller) {
         AnchorPane root = (AnchorPane) controller.imageViewDeck.getScene().getRoot();
         Timeline timeline = new Timeline();
@@ -170,7 +205,7 @@ public class Animations {
                 tempCard.setFitWidth(80);
                 tempCard.setFitHeight(120);
 
-                // Coordenadas de inicio: baraja (imageViewDeck)
+                // Starting coordinates: deck (imageViewDeck)
                 Bounds deckBoundsScene = controller.imageViewDeck.localToScene(controller.imageViewDeck.getBoundsInLocal());
                 Point2D deckInRoot = root.sceneToLocal(deckBoundsScene.getMinX(), deckBoundsScene.getMinY());
                 double startX = deckInRoot.getX();
@@ -178,10 +213,10 @@ public class Animations {
                 tempCard.setLayoutX(startX);
                 tempCard.setLayoutY(startY);
 
-                // Solo se añade al root después de posicionarla
+                // Only add to root after positioning
                 root.getChildren().add(tempCard);
 
-                // Coordenadas de destino: mano de jugador o máquina
+                // Destination coordinates: player's or machine's hand
                 Bounds targetBoundsScene = isMachine
                         ? controller.stackPaneCardsMachine.localToScene(controller.stackPaneCardsMachine.getBoundsInLocal())
                         : controller.stackPaneCardsPlayer.localToScene(controller.stackPaneCardsPlayer.getBoundsInLocal());
@@ -189,16 +224,16 @@ public class Animations {
                         targetBoundsScene.getMinX() + targetBoundsScene.getWidth() / 2,
                         targetBoundsScene.getMinY() + targetBoundsScene.getHeight() / 2
                 );
-                double endX = targetInRoot.getX() - 40; // centrado (mitad del ancho de la carta)
-                double endY = targetInRoot.getY() - 60; // centrado (mitad del alto de la carta)
+                double endX = targetInRoot.getX() - 40; // centered (half card width)
+                double endY = targetInRoot.getY() - 60; // centered (half card height)
 
-                // Animación de traslado
+                // Translation animation
                 TranslateTransition transition = new TranslateTransition(Duration.seconds(0.4), tempCard);
                 transition.setToX(endX - startX);
                 transition.setToY(endY - startY);
                 transition.setOnFinished(ev -> {
-                    root.getChildren().remove(tempCard);  // eliminar carta animada
-                    gameUno.eatCard(player, 1);           // lógica del juego
+                    root.getChildren().remove(tempCard);  // remove animated card
+                    gameUno.eatCard(player, 1);           // game logic
                     if (isMachine) {
                         controller.printCardsMachinePlayer();
                     } else {
@@ -214,9 +249,4 @@ public class Animations {
 
         timeline.play();
     }
-    // Otros métodos de animación...
-    }
-
-
-
-
+}
