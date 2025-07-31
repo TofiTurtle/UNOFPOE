@@ -47,9 +47,22 @@ public class PlayerSetUpController {
         // Listener for text field changes to hide empty name warning
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.trim().isEmpty()) {
+                textField.setOnKeyPressed(event -> {
+                    switch (event.getCode()) {
+                        case ENTER:
+                            try {
+                                startGame(null);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                    }
+                });
                 emptyNameLabel.setVisible(false);
             }
         });
+
+
 
         // Load all available player images
         images = List.of(
