@@ -299,7 +299,7 @@ public class GameUnoController {
                 // ---- NUEVO: Rectangle detrás ---- (para cumplirle la rubrica a don fabian xd)
                 Rectangle highlight = new Rectangle(70, 90);
                 highlight.setFill(null);
-                highlight.setStroke(Color.RED);
+                highlight.setStroke(Color.LIMEGREEN);
                 highlight.setStrokeWidth(15);
                 highlight.setArcWidth(10);
                 highlight.setArcHeight(10);
