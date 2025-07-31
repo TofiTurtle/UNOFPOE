@@ -22,10 +22,20 @@ class TableTest {
     void isValidPlay_shouldAcceptColorMatch_andAddCard() {
         Table table = new Table();
         String url = "/org/example/eiscuno/cards-uno/7_green.png";
-        Card start = new Card( url, "7", "GREEN");
+        Card start = new Card(url, "7", "GREEN") {
+            @Override
+            public boolean isSpecial() {
+                return false;
+            }
+        };
         table.addCardOnTheTable(start);
 
-        Card sameColor = new Card("/org/example/eiscuno/cards-uno/2_green.png", "2", "GREEN");
+        Card sameColor = new Card("/org/example/eiscuno/cards-uno/2_green.png", "2", "GREEN") {
+            @Override
+            public boolean isSpecial() {
+                return false;
+            }
+        };
         assertTrue(table.isValidPlay(sameColor));
         assertEquals(sameColor, table.getCurrentCardOnTheTable());
         assertEquals(2, table.getCardsTable().size());
@@ -35,10 +45,20 @@ class TableTest {
     void isValidPlay_shouldRejectInvalid_andNotChangeTable() {
         Table table = new Table();
         String url = "/org/example/eiscuno/cards-uno/5_red.png";
-        Card start = new Card(url, "5", "RED");
+        Card start = new Card(url, "5", "RED") {
+            @Override
+            public boolean isSpecial() {
+                return false;
+            }
+        };
         table.addCardOnTheTable(start);
 
-        Card invalid = new Card("/org/example/eiscuno/cards-uno/3_blue.png", "3", "BLUE");
+        Card invalid = new Card("/org/example/eiscuno/cards-uno/3_blue.png", "3", "BLUE") {
+            @Override
+            public boolean isSpecial() {
+                return false;
+            }
+        };
         assertFalse(table.isValidPlay(invalid));
         assertEquals(start, table.getCurrentCardOnTheTable());
         assertEquals(1, table.getCardsTable().size());
@@ -54,7 +74,12 @@ class TableTest {
     void table_shouldReturnAllCardsPlacedOnIt() {
         Table table = new Table();
         String url = "/org/example/eiscuno/cards-uno/3_green.png";
-        Card card = new Card(url, "3", "GREEN");
+        Card card = new Card(url, "3", "GREEN") {
+            @Override
+            public boolean isSpecial() {
+                return false;
+            }
+        };
 
         for(int i = 0; i < 10; i++) {
             table.addCardOnTheTable(card);
