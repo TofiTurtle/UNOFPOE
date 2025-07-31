@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.eiscuno.controller.PlayerSetUpController">
+   <children>
+
+      <!-- Fondo de pantalla -->
+      <ImageView fitWidth="1920" fitHeight="1080" preserveRatio="true">
+         <image>
+            <Image url="@images/start2_image.jpeg"/>
+         </image>
+      </ImageView>
+
+      <!-- Contenedor negro translúcido centrado -->
+      <StackPane alignment="CENTER">
+         <!-- Fondo tipo tarjeta -->
+         <Rectangle width="400" height="600" arcWidth="30" arcHeight="30"
+                    fill="rgba(0,0,0,0.6)" />
+
+         <!-- Contenido -->
+         <VBox spacing="20" alignment="CENTER">
+            <padding>
+               <Insets top="30" bottom="30" left="20" right="20"/>
+            </padding>
+
+            <!-- Título -->
+            <Label text="Selecciona tu personaje"
+                   style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" />
+
+            <!-- Imagen del personaje -->
+            <ImageView fx:id="imageView" fitWidth="150.0" fitHeight="160.0" preserveRatio="true" />
+
+            <!-- Botones para cambiar personaje -->
+            <HBox spacing="40" alignment="CENTER">
+               <Button fx:id="previousButton" onAction="#previousImage" text="←"
+                       style="-fx-background-color: #e7ffff; -fx-text-fill: #000000; -fx-font-size: 16px; -fx-padding: 8 18; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 5, 0, 2, 2);" />
+               <Button fx:id="nextButton" onAction="#nextImage" text="→"
+                       style="-fx-background-color: #e7ffff; -fx-text-fill: #000000; -fx-font-size: 16px; -fx-padding: 8 18; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 5, 0, 2, 2);" />
+            </HBox>
+
+            <!-- Campo de texto estilizado -->
+            <TextField fx:id="textField" promptText="Ingrese su nombre" maxWidth="250"
+                       style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 16px; -fx-prompt-text-fill: gray; -fx-border-color: white; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6;" />
+
+            <!-- Mensaje de advertencia -->
+            <Label fx:id="emptyNameLabel" text="Ingrese un nombre!"
+                   style="-fx-text-fill: #dd4f5d; -fx-font-weight: bold;" />
+
+            <!-- Botón para iniciar juego -->
+            <Button onAction="#startGame" text="Jugar"
+                    style="-fx-background-color: #19ba6e; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10 24; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);" />
+
+            <!-- Botón para volver al inicio -->
+            <Button fx:id="BackToStart" onAction="#goBackToStart" text="Volver al inicio"
+                    style="-fx-background-color: #5383c8; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10 24; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 2, 2);" />
+         </VBox>
+      </StackPane>
+   </children>
+</StackPane>

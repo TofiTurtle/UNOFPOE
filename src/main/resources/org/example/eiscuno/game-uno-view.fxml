@@ -1,81 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="670.0" style="-fx-background-color: orange;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
-   <left>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <Button fx:id="buttonDeck" layoutX="50.0" layoutY="30.0" mnemonicParsing="false" onAction="#onHandleTakeCard" prefHeight="149.0" prefWidth="100.0" text="Baraja" />
-         </children>
-      </Pane>
-   </left>
-   <right>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <Button fx:id="buttonUNO" layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="100.0" text="UNO" />
-         </children>
-      </Pane>
-   </right>
-   <center>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fx:id="tableImageView" fitHeight="149.0" fitWidth="100.0" layoutX="50.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true" />
-         </children>
-      </Pane>
-   </center>
-   <top>
-      <HBox alignment="CENTER" prefHeight="133.0" prefWidth="600.0" spacing="10.0" BorderPane.alignment="CENTER">
-         <children>
-            <Label text="EISC Uno" textFill="RED">
-               <font>
-                  <Font name="Berlin Sans FB Bold" size="18.0" />
-               </font>
-            </Label>
-            <GridPane fx:id="gridPaneCardsMachine">
-               <columnConstraints>
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-               </rowConstraints>
-            </GridPane>
-            <Button fx:id="buttonExit" mnemonicParsing="false" onAction="#onHandleExit" text="Salir" />
-         </children>
-      </HBox>
-   </top>
-   <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <Button mnemonicParsing="false" onAction="#onHandleBack" prefWidth="74.0" style="-fx-background-color: red;" text="Anterior" textFill="WHITE">
-               <font>
-                  <Font name="Berlin Sans FB" size="12.0" />
-               </font></Button>
-            <GridPane fx:id="gridPaneCardsPlayer">
-              <columnConstraints>
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-            </GridPane>
-            <Button mnemonicParsing="false" onAction="#onHandleNext" prefWidth="74.0" style="-fx-background-color: RED;" text="Siguiente" textFill="WHITE" />
-         </children>
-      </HBox>
-   </bottom>
-</BorderPane>
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
+   <children>
+      <ImageView fitHeight="1000.0" fitWidth="1600.0" layoutX="0.0" layoutY="0.0" pickOnBounds="true" preserveRatio="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@images/game-uno.jpg" />
+         </image>
+      </ImageView>
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+         <center>
+            <HBox alignment="CENTER" spacing="200" BorderPane.alignment="CENTER">
+               <children>
+                  <!-- Baraja con botón invisible superpuesto -->
+                  <StackPane alignment="CENTER">
+                     <ImageView fx:id="imageViewDeck" fitHeight="173.0" fitWidth="136.0" preserveRatio="true">
+                        <image>
+                           <Image url="@cards-uno/deck_of_cards.png" />
+                        </image>
+                     </ImageView>
+                     <Button fx:id="buttonDeck" mnemonicParsing="false" onAction="#onHandleTakeCard" prefHeight="173.0" prefWidth="136.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px;                                     -fx-border-color: black; -fx-border-width: 1px;                                     -fx-background-color: white; -fx-opacity: 0;" text="Baraja">
+                        <cursor>
+                           <Cursor fx:constant="CLOSED_HAND" />
+                        </cursor>
+                     </Button>
+                  </StackPane>
+
+                  <!-- Carta central con label -->
+                  <!-- Carta central con label y selección de color -->
+                  <StackPane prefHeight="200.0" prefWidth="150.0">
+                     <VBox alignment="CENTER" spacing="10" translateX="30" translateY="20">
+                        <Label fx:id="labelAlertMachine" alignment="CENTER" maxWidth="280.0" style="-fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold;" text=" " textAlignment="CENTER" wrapText="true" />
+
+                        <HBox fx:id="colorChooserHBox" alignment="CENTER" managed="false" spacing="10" translateX="75" translateY="170" visible="false">
+                           <Button fx:id="buttonRed" style="-fx-background-color: red; -fx-pref-width: 30px; -fx-pref-height: 30px;" text=" " />
+                           <Button fx:id="buttonGreen" style="-fx-background-color: green; -fx-pref-width: 30px; -fx-pref-height: 30px;" text=" " />
+                           <Button fx:id="buttonBlue" style="-fx-background-color: blue; -fx-pref-width: 30px; -fx-pref-height: 30px;" text=" " />
+                           <Button fx:id="buttonYellow" style="-fx-background-color: gold; -fx-pref-width: 30px; -fx-pref-height: 30px;" text=" " />
+                        </HBox>
+
+                        <ImageView fx:id="tableImageView" fitHeight="149.0" fitWidth="100.0" preserveRatio="true" />
+                     </VBox>
+
+                  </StackPane>
+
+                  <!-- Botón UNO superpuesto a la imagen y botón Salir abajo -->
+                  <VBox alignment="CENTER" spacing="10">
+                     <StackPane alignment="CENTER">
+                        <ImageView fx:id="imageViewUNO" fitHeight="86.0" fitWidth="116.0" preserveRatio="true">
+                           <image>
+                              <Image url="@images/button_uno.png" />
+                           </image>
+                        </ImageView>
+                        <Button fx:id="buttonUNO" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="86.0" prefWidth="116.0" style="-fx-background-radius: 25px; -fx-border-radius: 25px;                                        -fx-border-color: black; -fx-border-width: 1px;                                        -fx-background-color: white; -fx-opacity: 0;" text="UNO">
+                           <cursor>
+                              <Cursor fx:constant="CLOSED_HAND" />
+                           </cursor>
+                        </Button>
+                     </StackPane>
+   
+                                 <!-- Botón salir con estilo Bootstrap rojo -->
+                     <Button fx:id="buttonExit" mnemonicParsing="false" onAction="#onHandleExit" prefHeight="33.0" prefWidth="100.0" style="-fx-background-color: #dc3545; -fx-text-fill: white;                                     -fx-font-size: 14px; -fx-font-weight: bold;                                     -fx-background-radius: 25px; -fx-border-radius: 25px;                                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 3, 0, 1, 1);" text="Salir">
+                        <cursor>
+                           <Cursor fx:constant="HAND" />
+                        </cursor>
+                     </Button>
+                  </VBox>
+               </children>
+            </HBox>
+         </center>
+
+         <top>
+            <HBox fx:id="stackPaneCardsMachine" alignment="CENTER" prefHeight="140.0" spacing="10.0" BorderPane.alignment="CENTER" />
+         </top>
+
+         <bottom>
+            <HBox alignment="CENTER" prefHeight="140.0" spacing="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <StackPane alignment="CENTER">
+                     <Label fx:id="playerNickname" alignment="CENTER" prefHeight="42.0" prefWidth="105.0" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px;                           -fx-background-color: rgba(0, 0, 0, 0.5); -fx-background-radius: 6;                           -fx-padding: 4 10 4 10;" text="Label" textAlignment="CENTER" />
+                  </StackPane>
+                  <ImageView fx:id="playerImage" fitHeight="131.0" fitWidth="142.0" pickOnBounds="true" preserveRatio="true" />
+                  <StackPane fx:id="stackPaneCardsPlayer" alignment="CENTER" prefHeight="100.0" prefWidth="487.0" />
+               </children>
+            </HBox>
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>

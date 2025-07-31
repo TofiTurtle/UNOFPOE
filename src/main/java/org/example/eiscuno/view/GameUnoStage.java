@@ -3,7 +3,11 @@ package org.example.eiscuno.view;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.example.eiscuno.controller.GameUnoController;
+import org.example.eiscuno.model.saveGame.GameState;
 
 import java.io.IOException;
 
@@ -18,19 +22,27 @@ public class GameUnoStage extends Stage {
      *
      * @throws IOException if an error occurs while loading the FXML file for the game interface.
      */
-    public GameUnoStage() throws IOException {
+    public GameUnoStage(String playerName, String currentImage, GameState gameState) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/game-uno-view.fxml"));
-        Parent root;
+        AnchorPane root;
         try {
             root = loader.load();
         } catch (IOException e) {
             // Re-throwing the caught IOException
             throw new IOException("Error al cargar el archvio FXML", e);
         }
+
+        GameUnoController controller = loader.getController();
+        controller.initPlayer(playerName, currentImage, gameState);
+        controller.setPlayerImage();
+        controller.setPlayerNickname();
+
+
         Scene scene = new Scene(root);
         // Configuring the stage
         setTitle("EISC Uno"); // Sets the title of the stage
         setScene(scene); // Sets the scene for the stage
+        setFullScreen(true); // <-- Pantalla completa
         setResizable(false); // Disallows resizing of the stage
         show(); // Displays the stage
     }
@@ -50,10 +62,10 @@ public class GameUnoStage extends Stage {
      * @return the singleton instance of GameUnoStage.
      * @throws IOException if an error occurs while creating the instance.
      */
-    public static GameUnoStage getInstance() throws IOException {
+    public static GameUnoStage getInstance(String playerName, String currentImage, GameState gameState) throws IOException {
         return GameUnoStageHolder.INSTANCE != null ?
                 GameUnoStageHolder.INSTANCE :
-                (GameUnoStageHolder.INSTANCE = new GameUnoStage());
+                (GameUnoStageHolder.INSTANCE = new GameUnoStage(playerName,currentImage, gameState));
     }
 
     /**

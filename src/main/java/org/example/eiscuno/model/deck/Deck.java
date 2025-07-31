@@ -1,29 +1,35 @@
 package org.example.eiscuno.model.deck;
 
-import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 import org.example.eiscuno.model.card.Card;
+import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Stack;
 
 /**
- * Represents a deck of Uno cards.
+ * Represents a deck of Uno cards used in the game.
+ * Manages both the main deck and an auxiliary deck for discarded or played cards.
  */
-public class Deck {
+public class Deck implements Serializable {
     private Stack<Card> deckOfCards;
+    private Stack<Card> AuxdeckOfCards;
 
     /**
-     * Constructs a new deck of Uno cards and initializes it.
+     * Constructs a new {@code Deck} and initializes it with a set of cards.
      */
     public Deck() {
         deckOfCards = new Stack<>();
+        AuxdeckOfCards = new Stack<>();
         initializeDeck();
     }
 
     /**
-     * Initializes the deck with cards based on the EISCUnoEnum values.
+     * Initializes the main deck by generating cards based on the {@code EISCUnoEnum} values.
+     * Uses {@code CardFactory} to create appropriate card instances.
      */
-    private void initializeDeck() {
+    public void initializeDeck() {
         for (EISCUnoEnum cardEnum : EISCUnoEnum.values()) {
             if (cardEnum.name().startsWith("GREEN_") ||
                     cardEnum.name().startsWith("YELLOW_") ||
@@ -34,100 +40,99 @@ public class Deck {
                     cardEnum.name().startsWith("TWO_WILD_DRAW") ||
                     cardEnum.name().equals("FOUR_WILD_DRAW") ||
                     cardEnum.name().equals("WILD")) {
-                Card card = new Card(cardEnum.getFilePath(), getCardValue(cardEnum.name()), getCardColor(cardEnum.name()));
-                System.out.println("Deck" + card.getColor());
-                System.out.println("Deck" + card.getValue());
-                System.out.println("Deck" + card.getCard());
+
+                Card card = CardFactory.createCard(cardEnum);
                 deckOfCards.push(card);
             }
         }
         Collections.shuffle(deckOfCards);
     }
 
-    private String getCardValue(String name) {
-        if (name.endsWith("0")){
-            return "0";
-        } else if (name.endsWith("1")){
-            return "1";
-        } else if (name.endsWith("2")){
-            return "2";
-        } else if (name.endsWith("3")){
-            return "3";
-        } else if (name.endsWith("4")){
-            return "4";
-        } else if (name.endsWith("5")){
-            return "5";
-        } else if (name.endsWith("6")){
-            return "6";
-        } else if (name.endsWith("7")){
-            return "7";
-        } else if (name.endsWith("8")){
-            return "8";
-        } else if (name.endsWith("9")) {
-            return "9";
-        } else if (name.startsWith("SKIP")) {
-            return "SKIP";
-        } else if (name.startsWith("WILD")) {
-            return "WILD";
-        } else if (name.startsWith("TWO_WILD")) {
-            return "TWO_WILD";
-        } else if (name.startsWith("FOUR_WILD")) {
-            return "FOUR_WILD";
-        } else if (name.startsWith("RESERVE")) {
-            return "RESERVE";
-        } else {
-            return null;
-        }
-
-    }
-
-    private String getCardColor(String name){
-        if(name.startsWith("GREEN")){
-            return "GREEN";
-        } else if(name.startsWith("YELLOW")){
-            return "YELLOW";
-        } else if(name.startsWith("BLUE")){
-            return "BLUE";
-        } else if(name.startsWith("RED")){
-            return "RED";
-        } else if (name.endsWith("GREEN")) {
-            return "GREEN";
-        } else if(name.endsWith("YELLOW")){
-            return "YELLOW";
-        } else if(name.endsWith("BLUE")){
-            return "BLUE";
-        } else if(name.endsWith("RED")){
-            return "RED";
-        } else if(name.endsWith("DRAW")) {
-            return "BLACK";
-        } else if (name.startsWith("WILD")) {
-            return "BLACK";
-        } else {
-            return null;
-        }
-    }
-
     /**
-     * Takes a card from the top of the deck.
+     * Draws the top card from the main deck.
      *
-     * @return the card from the top of the deck
-     * @throws IllegalStateException if the deck is empty
+     * @return the card drawn from the top of the deck
+     * @throws IllegalStateException if the main deck is empty
      */
     public Card takeCard() {
         if (deckOfCards.isEmpty()) {
-            throw new IllegalStateException("No hay más cartas en el mazo.");
+            throw new IllegalStateException("No more cards in the deck.");
         }
-        Card auxCard = deckOfCards.pop(); //var temporal auxiliar para ver QUE carta agarra
-        System.out.println("Cogio la carta -> " + auxCard.getColor() + ": " + auxCard.getValue());
-        return auxCard;
+        return deckOfCards.pop();
     }
 
     /**
-     * Checks if the deck is empty.
+     * Checks if the main deck is empty.
      *
-     * @return true if the deck is empty, false otherwise
+     * @return {@code true} if the main deck is empty; {@code false} otherwise
      */
     public boolean isEmpty() {
         return deckOfCards.isEmpty();
+    }
+
+    /**
+     * Adds a card back to the main deck and reshuffles the deck.
+     *
+     * @param card the card to be added to the deck
+     */
+    public void addCardToDeck(Card card) {
+        deckOfCards.push(card);
+        Collections.shuffle(deckOfCards);
+    }
+
+    /**
+     * Retrieves all cards currently in the main deck.
+     *
+     * @return an {@code ArrayList} of cards in the main deck
+     */
+    public ArrayList<Card> getCards() {
+        return new ArrayList<>(deckOfCards);
+    }
+
+    /**
+     * Retrieves all cards in the auxiliary deck (played or discarded cards).
+     *
+     * @return an {@code ArrayList} of cards in the auxiliary deck
+     */
+    public ArrayList<Card> getAuxCards() {
+        return new ArrayList<>(AuxdeckOfCards);
+    }
+
+    /**
+     * Returns the number of cards in the auxiliary deck.
+     *
+     * @return the size of the auxiliary deck
+     */
+    public int getAuxDeckSize() {
+        return AuxdeckOfCards.size();
+    }
+
+    /**
+     * Returns the number of cards in the main deck.
+     *
+     * @return the size of the main deck
+     */
+    public int getDeckSize() {
+        return deckOfCards.size();
+    }
+
+    /**
+     * Pushes a card onto the auxiliary deck (e.g., after being played).
+     *
+     * @param card the card to be pushed onto the auxiliary deck
+     */
+    public void PushToAuxDeck(Card card) {
+        AuxdeckOfCards.add(card);
+    }
+
+    /**
+     * Refills the main deck with all cards from the auxiliary deck and shuffles them.
+     * Used when the main deck runs out of cards.
+     */
+    public void RefillCards() {
+        while (!AuxdeckOfCards.isEmpty()) {
+            deckOfCards.push(AuxdeckOfCards.pop());
+        }
+        Collections.shuffle(deckOfCards);
     }
 }

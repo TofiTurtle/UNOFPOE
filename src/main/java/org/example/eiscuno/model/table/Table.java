@@ -1,56 +1,74 @@
 package org.example.eiscuno.model.table;
-
 import org.example.eiscuno.model.card.Card;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Represents the table in the Uno game where cards are played.
+ * Represents the game table where UNO cards are played and managed.
+ * <p>
+ * This class handles the cards currently in play and validates card plays
+ * according to UNO game rules. It implements {@link Serializable} to support
+ * game state persistence.
+ * </p>
  */
-public class Table {
+public class Table implements Serializable {
     private ArrayList<Card> cardsTable;
 
     /**
-     * Constructs a new Table object with no cards on it.
+     * Constructs a new empty table with no cards.
      */
-    public Table(){
+    public Table() {
         this.cardsTable = new ArrayList<Card>();
     }
 
     /**
-     * Adds a card to the table.
+     * Adds a card to the table (play area).
      *
-     * @param card The card to be added to the table.
+     * @param card the card to be placed on the table
      */
-    public void addCardOnTheTable(Card card){
+    public void addCardOnTheTable(Card card) {
         this.cardsTable.add(card);
     }
 
-
-    /*
-    Este metodo esta pensado para hacer las validaciones de si una carta se puede jugar o no
-    dependiendo de la carta que esta en la mesa
+    /**
+     * Validates if a card can be played on the current table card according to UNO rules.
+     * <p>
+     * A play is valid if:
+     * <ul>
+     *   <li>The card is a wild card (BLACK color)</li>
+     *   <li>The table is empty (only at game start)</li>
+     *   <li>The card matches the current card's color</li>
+     *   <li>The card matches the current card's value</li>
+     * </ul>
+     * </p>
+     *
+     * @param card the card being attempted to play
+     * @return true if the play is valid, false otherwise
      */
     public boolean isValidPlay(Card card) {
-        /*
-        Aqui usamos un operador ternario ya que al inicio cuando la mesa esta vacia produciria un error el querer obtener la carta en la mesa
-         */
-        Card currentCard = this.getCardsTable().isEmpty() ? null : getCurrentCardOnTheTable() ;
-
-        /*
-        Aqui digo que si la mesa esta vacia
-        o que si la carta en la mesa es de color negro pues que ponga lo que quiera
-        */
-        if( this.getCardsTable().isEmpty() || currentCard.getColor().equals("BLACK")) {
+        // Wild cards (BLACK) can always be played
+        if (card.getOriginalColor().equals("BLACK")) {
             this.addCardOnTheTable(card);
             return true;
         }
-        /*
-        Aqui se dice que si el color de la carta en la mesa es igual a la carta que se quiere poner
-        o que si el valor de la carta en la mesa es igual al valor de la carta que se quiere poner pues que lo deje
-        o la otra es que si la carta que se quiere poner es de color negro pues que lo deje
-        */
-        else if(currentCard.getColor().equals(card.getColor())  || currentCard.getValue().equals(card.getValue()) || card.getColor().equals("BLACK")) {
+
+        // Any card can be played if table is empty (game start)
+        if (this.getCardsTable().isEmpty()) {
+            this.addCardOnTheTable(card);
+            return true;
+        }
+
+        Card currentCard = getCurrentCardOnTheTable();
+
+        // Color match validation
+        if (currentCard.getColor().equals(card.getColor())) {
+            this.addCardOnTheTable(card);
+            return true;
+        }
+
+        // Value match validation
+        if (currentCard.getValue().equals(card.getValue())) {
             this.addCardOnTheTable(card);
             return true;
         }
@@ -59,10 +77,10 @@ public class Table {
     }
 
     /**
-     * Retrieves the current card on the table.
+     * Gets the current top card on the table.
      *
-     * @return The card currently on the table.
-     * @throws IndexOutOfBoundsException if there are no cards on the table.
+     * @return the card currently on top of the table
+     * @throws IndexOutOfBoundsException if there are no cards on the table
      */
     public Card getCurrentCardOnTheTable() throws IndexOutOfBoundsException {
         if (cardsTable.isEmpty()) {
@@ -71,7 +89,11 @@ public class Table {
         return this.cardsTable.get(this.cardsTable.size()-1);
     }
 
-
+    /**
+     * Gets all cards currently on the table.
+     *
+     * @return an ArrayList containing all cards on the table
+     */
     public ArrayList<Card> getCardsTable() {
         return cardsTable;
     }
