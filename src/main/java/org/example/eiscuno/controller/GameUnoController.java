@@ -25,6 +25,7 @@ import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
+import org.example.eiscuno.model.player.ThreadSingUNOPlayer;
 import org.example.eiscuno.model.saveGame.GameState;
 import org.example.eiscuno.model.saveGame.SerializableFileHandler;
 import org.example.eiscuno.model.table.Table;
@@ -337,43 +338,10 @@ public class GameUnoController {
             machineSaidUNO = false; // Reiniciar bandera aquí para evitar que herede el valor anterior
             System.out.println("La máquina tiene solo una carta. Esperando si el jugador le canta...");
 
-            new Thread(() -> { //También usamos un hilo para no bloquear la interfaz
-                try {
-                    //Tiempo de reacción de la máquina (simula que ella va a decir UNO)
-                    int delay = 1000 + new Random().nextInt(2000);
-                    Thread.sleep(delay);
-
-                    // Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
-                    if (!machineSaidUNO) {
-                        machineSaidUNO = true;
-                        System.out.println("La máquina dijo UNO a tiempo.");
-                    } else {
-                        try {
-                            throw new PenaltyException("La máquina no dijo UNO a tiempo.", "MACHINE");
-                        } catch (PenaltyException e) {
-                            Platform.runLater(() -> {
-                                if (e.getPenalizedEntity().equals("MACHINE")) {
-                                    machinePlayer.addCard(deck.takeCard());
-                                    saveGame();
-
-                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                    alert.setTitle("Penalización a la Máquina");
-                                    alert.setHeaderText("¡Le cantaste UNO primero a la máquina!");
-                                    alert.setContentText("La máquina fue penalizada con una carta.");
-                                    alert.showAndWait();
-                                }
-                            });
-                        }
-                    }
-
-                    unoCheckMachineStarted = false;
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            // Iniciar hilo dedicado
+            ThreadSingUNOPlayer threadSingUNOPlayer = new ThreadSingUNOPlayer(this, machinePlayer, machinePlayer.getCardsPlayer(), deck);
+            threadSingUNOPlayer.start();
         }
-
     }
 
 
@@ -706,7 +674,33 @@ public class GameUnoController {
     public Label getLabelAlertMachine() {
         return labelAlertMachine;
     }
+
     public void setUnoCheckMachineStarted(boolean value) {
         this.unoCheckMachineStarted = value;
+    }
+
+
+    public boolean isMachineSaidUNO() {
+        return machineSaidUNO;
+    }
+
+    public void setMachineSaidUNO(boolean saidUNO) {
+        this.machineSaidUNO = saidUNO;
+    }
+
+    public Deck getDeck() {
+        return this.deck;
+    }
+
+    public boolean isUnoCheckMachineStarted() {
+        return unoCheckMachineStarted;
+    }
+
+    public void showPenaltyAlert(String who, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Penalización");
+        alert.setHeaderText("¡" + who + " fue penalizado!");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
