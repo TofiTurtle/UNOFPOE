@@ -1,11 +1,13 @@
 package org.example.eiscuno.controller;
 
 import javafx.animation.Interpolator;
+import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -15,8 +17,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.example.eiscuno.exceptions.PenaltyException;
 import org.example.eiscuno.model.card.Card;
@@ -25,6 +30,7 @@ import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
+import org.example.eiscuno.model.player.ThreadSingUNOPlayer;
 import org.example.eiscuno.model.saveGame.GameState;
 import org.example.eiscuno.model.saveGame.SerializableFileHandler;
 import org.example.eiscuno.model.table.Table;
@@ -34,6 +40,7 @@ import org.example.eiscuno.view.StartUnoView;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Controller class for the Uno game.
@@ -70,6 +77,16 @@ public class GameUnoController {
     private ImageView playerImage;
     @FXML
     private Label playerNickname;
+    @FXML private HBox colorChooserHBox;
+    @FXML private Button buttonRed;
+    @FXML private Button buttonGreen;
+    @FXML private Button buttonBlue;
+    @FXML private Button buttonYellow;
+
+    private Consumer<String> onColorPicked;
+    private Queue<String> alertQueue = new LinkedList<>();
+    private boolean isAlertShowing = false;
+
 
     public Player humanPlayer;
     private Player machinePlayer;
@@ -97,10 +114,28 @@ public class GameUnoController {
      */
     @FXML
     public void initialize() {
+        /*initialize siempre se ejecuta independientemente de la version
+        Por esta razon se ponen estos dos elementos aca, que independientemente
+        de la version siempre van*/
         labelAlertMachine.setText("");
-        initVariables();
+        serializableFileHandler = new SerializableFileHandler();
+        //Para manejo de wildcard de colores
+        buttonRed.setOnAction(e -> handleColorPick("RED"));
+        buttonGreen.setOnAction(e -> handleColorPick("GREEN"));
+        buttonBlue.setOnAction(e -> handleColorPick("BLUE"));
+        buttonYellow.setOnAction(e -> handleColorPick("YELLOW"));
 
-
+    }
+    /*Este metodo es literalmente el mismo initialize, combinado con el initvariables
+    * */
+    public void setupNewGame(){
+        System.out.println("Cargando una NUEVA PARTIDA");
+        this.humanPlayer = new Player("HUMAN_PLAYER");
+        this.machinePlayer = new Player("MACHINE_PLAYER");
+        this.deck = new Deck();
+        this.table = new Table();
+        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+        this.posInitCardToShow = 0;
 
         //Bucle para prevenir que se pongan cartas especiales como carta inicial de partida
         while(!initialValidCard) //mientras que NO sea una carta inicial valida, se repetira...
@@ -120,6 +155,17 @@ public class GameUnoController {
                 //si se llega aqui, NO se pone la carta, se re-baraja
                 deck.addCardToDeck(firstCard); //llamamos al metodo addCardtodeck (de Clase deck)
             }
+            labelAlertMachine.textProperty().addListener((obs, oldText, newText) -> {
+                if (newText == null || newText.trim().isEmpty()) {
+                    labelAlertMachine.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+                } else {
+                    labelAlertMachine.setStyle(
+                            "-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" +
+                                    "-fx-background-color: rgba(0, 0, 0, 0.5); -fx-background-radius: 10;" +
+                                    "-fx-padding: 6 12 6 12;"
+                    );
+                }
+            });
         }
         //el resto de codigo se ejecuta ordinariamente...
 
@@ -134,31 +180,72 @@ public class GameUnoController {
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck ,this, machineCardViews, stackPaneCardsMachine);
         threadPlayMachine.start();
 
-        //implementacion de serializable
-        serializableFileHandler = new SerializableFileHandler();
+        //aqui supuestamente ya se inicializo todou, guardamos partida
+        saveGame();
+    }
+    /*
+    Ahora, en este metodo lo que hacemos es que a nuestras variables del juego, le pasaamos lo almacenado
+    en nuestro objeto gamestate
+     */
+    public void loadSavedGame() {
+        System.out.println("cargando una PARTIDA YA INICIADA CONTINUADA");
+        this.humanPlayer = gameState.getHumanPlayer();
+        this.machinePlayer = gameState.getMachinePlayer();
+        this.deck = gameState.getDeck();
+        this.table = gameState.getTable();
+        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+
+        /*Aqui lo que se hace es restaurar visualmente TODAS las cartas
+        * (player, machine, deck y auxdeck)
+        * Esto debido a que pues tenemos que serializar la clase Card, y debido a que esta
+        * tiene vainas visuales, pues no deja, entonces toca hacer que ese aspecto de la carta
+        * no se guarde, aunque como poseemos la url, despues de deserializar restauramos con este metodo
+        * */
+        for (Card c : humanPlayer.getCardsPlayer()) {
+            c.rebuildCardImageView();
+        }
+        for (Card c : machinePlayer.getCardsPlayer()) {
+            c.rebuildCardImageView();
+        }
+        for (Card c : deck.getCards()) {
+            c.rebuildCardImageView();
+        }
+        for (Card c : deck.getAuxCards()) {
+            c.rebuildCardImageView();
+        }
+
+        //colocamos la carta del centro, la que se esta jugando.
+        table.addCardOnTheTable(table.getCurrentCardOnTheTable()); //ponemos la carta en la table
+        tableImageView.setImage(table.getCurrentCardOnTheTable().getImage()); //ponemos la IMAGEN de esta
+        //imprimimos las cartas de los jugadores
+        printCardsHumanPlayer();
+        printCardsMachinePlayer();
+
+        //e igualmente creamos los hilos, pasando como parametro pues ya los datos guardados del gamesttte
+        threadSingUNOMachine = new ThreadSingUNOMachine(humanPlayer.getCardsPlayer(), this);
+        Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
+        t.start();
+
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.deck ,this, machineCardViews, stackPaneCardsMachine);
+        threadPlayMachine.start();
 
         //aqui supuestamente ya se inicializo todou, guardamos partida
         saveGame();
 
     }
 
-    /**
-     * Initializes the variables for the game.
-     */
-    private void initVariables() {
-        this.humanPlayer = new Player("HUMAN_PLAYER");
-        this.machinePlayer = new Player("MACHINE_PLAYER");
-        this.deck = new Deck();
-        this.table = new Table();
-        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
-        this.posInitCardToShow = 0;
-
-    }
 
     //ESTOS METODOS DE ACA SON PURAMENTE PARA PONERLE LA IMAGEN Y NOMBRE SELECCIONADO AL JUGADOR!!!
-    public void initPlayer(String playerName, String currentImage) {
+    public void initPlayer(String playerName, String currentImage, GameState gameState) {
         this.playerName = playerName;
         this.currentImage = currentImage;
+        this.gameState = gameState;
+
+        if(this.gameState==null){
+            setupNewGame();
+        }else{
+            loadSavedGame();
+        }
         // Lógica para usar esos datos: ponerlos en labels, imágenes, etc.
     }
     //metodo pa ponerle la imagen al jugador
@@ -169,21 +256,12 @@ public class GameUnoController {
         playerNickname.setText(playerName);
     }
     public void saveGame(){
-        ArrayList<Card> PlayerCards = humanPlayer.getCardsPlayer();
-        ArrayList<Card> machineCards =  machinePlayer.getCardsPlayer();
-        ArrayList<Card> deckCards = deck.getCards();
-        ArrayList<Card> auxdeckCards = deck.getAuxCards();
-        Card cardOnTable = table.getCurrentCardOnTheTable();
-
-        GameState gameState = new GameState(
-                PlayerCards, machineCards,
-                deckCards, auxdeckCards,
-                cardOnTable
-        );
-
+        //guardamos la partida con los objetos del juego:
+        GameState gameState = new GameState(humanPlayer, machinePlayer, deck, table);
+        //serializamos
         serializableFileHandler.serialize("game_data.ser", gameState);
+        //verificacion
         System.out.println("Si se guardo manito, calma! :)))");
-
     }
 
 
@@ -205,16 +283,28 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
             //SE PUEDE SEPARAR, esto es diseño de que el jugador pasa el cursor por encima de la carta y tenga un borde
             //--------------
+
+            // ---- NUEVO: Rectangle detrás ---- (para cumplirle la rubrica a don fabian xd)
+            Rectangle highlight = new Rectangle(70, 90);
+            highlight.setFill(null);
+            highlight.setStroke(Color.RED);
+            highlight.setStrokeWidth(15);
+            highlight.setArcWidth(10);
+            highlight.setArcHeight(10);
+            highlight.setVisible(false);
+
             // Aplicar borde directamente al ImageView al hacer hover
             cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
 
             cardImageView.setOnMouseEntered(e -> {
+                highlight.setVisible(true);
                 cardImageView.setScaleX(1.05);
                 cardImageView.setScaleY(1.05);
                 cardImageView.setStyle("-fx-effect: dropshadow(gaussian, black, 10, 0.5, 0, 0);");
             });
 
             cardImageView.setOnMouseExited(e -> {
+                highlight.setVisible(false);
                 cardImageView.setScaleX(1.0);
                 cardImageView.setScaleY(1.0);
                 cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
@@ -223,7 +313,7 @@ public class GameUnoController {
             * Aqui es donde Player Juega una carta
             * */
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                labelAlertMachine.setText("");
+                showGameAlert("");
                 if(table.isValidPlay(card) ) {
 
                     // Usamos la clase Animations
@@ -238,9 +328,10 @@ public class GameUnoController {
                         //System.out.println("CARTA ACTUAL EN LA MESA: " + table.getCurrentCardOnTheTable());
                         //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
                         if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
-                            unoCheckStarted = true; //Evita que se lance mas de una vez
-                            checkUNO("PLAYER"); //Simula que la maquina espera a ver si el jugador dice uno
+                            unoCheckStarted = true;
+                            playerSaidUNO = false; // ← importante reiniciar bandera
                         }
+
 
                         //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
                         //y este pueda seguir tomando cartas
@@ -271,7 +362,8 @@ public class GameUnoController {
                 }
             });
             //Contenedor para superposición, sin bloquear clicks
-            StackPane container = new StackPane(cardImageView);
+            StackPane container = new StackPane();
+            container.getChildren().addAll(highlight, cardImageView);
             container.setPickOnBounds(false); //<-- evita bloquear otras cartas
             container.setTranslateX(startOffset + i * offset);
             this.stackPaneCardsPlayer.getChildren().add(container);
@@ -280,115 +372,21 @@ public class GameUnoController {
 
 
     /**
-     * Este metodo verifica quién dice "UNO" primero: el jugador o la máquina.
-     * Dependiendo del parámetro "who", maneja los dos casos:
-     * - Si es "PLAYER", se espera que el jugador diga UNO antes que la máquina.
      * - Si es "MACHINE", se espera que el jugador acuse a la máquina antes de que ella lo diga.
      *
      *  @param who Cadena que representa quién tiene una carta. Puede ser "PLAYER" o "MACHINE".
      *  */
     private void checkUNO(String who) {
-
-        //Primer caso: Es el jugador quien tiene solo una carta
-        if (who.equals("PLAYER")) {
-            unoCheckStarted = true;//Se activa la bandera que indica que ya estamos revisando si el jugador dice UNO
-            playerSaidUNO = false;  // ← Reiniciar bandera para evitar heredar valor anterior
-            System.out.println("El jugador tiene solo una carta, esperando quién dice UNO primero...");
-
-            new Thread(() -> { //Creamos un nuevo hilo para no bloquear la interfaz gráfica
-                try {
-                    //Esperamos entre 1 y 3 segundos (simula el tiempo que tarda la máquina en decir UNO)
-                    int delay = 1000 + new Random().nextInt(2000);
-                    Thread.sleep(delay);
-
-                    //Si el jugador NO dijo UNO en ese tiempo, es penalizado
-                    if (!playerSaidUNO) {
-                        try {
-                            //Excepcion marcada
-                            throw new PenaltyException("El jugador no dijo UNO a tiempo.", "PLAYER");
-                        } catch (PenaltyException e) {
-
-                            // Volvemos al hilo de la interfaz para modificar componentes visuales
-                            Platform.runLater(() -> {
-                                Card penaltyCard = deck.takeCard();
-                                saveGame();
-                                humanPlayer.getCardsPlayer().add(penaltyCard); // Lógica del juego
-
-                                // Hacemos la animación desde el mazo hasta la mano del jugador
-                                Animations.animateCardFromDeck(
-                                        Card.getBackImage(),            // Imagen boca abajo
-                                        imageViewDeck,                  // Nodo de origen (mazo)
-                                        stackPaneCardsPlayer,          // Nodo destino (mano del jugador)
-                                        false,                          // false porque no es la máquina
-                                        () -> printCardsHumanPlayer()  // Acción que actualiza la mano
-                                );
-
-                                // Mostramos la alerta
-                                Alert alert = new Alert(Alert.AlertType.WARNING);
-                                alert.setTitle("UNO");
-                                alert.setHeaderText("¡La máquina dijo UNO primero!");
-                                alert.setContentText("Has sido penalizado con una carta.");
-                                alert.showAndWait();
-                            });
-                        }
-                    } else {
-                        // Si el jugador dijo UNO a tiempo, no pasa nada
-                        System.out.println("El jugador dijo UNO a tiempo.");
-                    }
-
-                    // Reiniciamos las banderas para que pueda volver a usarse el sistema
-                    playerSaidUNO = false;
-                    unoCheckStarted = false;
-
-                } catch (InterruptedException e) {
-                    // Capturamos cualquier interrupción del hilo
-                    e.printStackTrace();
-                }
-            }).start();
-
             //Segundo caso: Es la máquina quien tiene una sola carta
-        } else if (who.equals("MACHINE")) {
+        if (who.equals("MACHINE")) {
             unoCheckMachineStarted = true; //Activamos la bandera de que estamos esperando si la máquina dice UNO
             machineSaidUNO = false; // Reiniciar bandera aquí para evitar que herede el valor anterior
             System.out.println("La máquina tiene solo una carta. Esperando si el jugador le canta...");
 
-            new Thread(() -> { //También usamos un hilo para no bloquear la interfaz
-                try {
-                    //Tiempo de reacción de la máquina (simula que ella va a decir UNO)
-                    int delay = 1000 + new Random().nextInt(2000);
-                    Thread.sleep(delay);
-
-                    // Si la máquina aún no ha sido acusada, se autodefiende diciendo UNO
-                    if (!machineSaidUNO) {
-                        machineSaidUNO = true;
-                        System.out.println("La máquina dijo UNO a tiempo.");
-                    } else {
-                        try {
-                            throw new PenaltyException("La máquina no dijo UNO a tiempo.", "MACHINE");
-                        } catch (PenaltyException e) {
-                            Platform.runLater(() -> {
-                                if (e.getPenalizedEntity().equals("MACHINE")) {
-                                    machinePlayer.addCard(deck.takeCard());
-                                    saveGame();
-
-                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                    alert.setTitle("Penalización a la Máquina");
-                                    alert.setHeaderText("¡Le cantaste UNO primero a la máquina!");
-                                    alert.setContentText("La máquina fue penalizada con una carta.");
-                                    alert.showAndWait();
-                                }
-                            });
-                        }
-                    }
-
-                    unoCheckMachineStarted = false;
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            // Iniciar hilo dedicado
+            ThreadSingUNOPlayer threadSingUNOPlayer = new ThreadSingUNOPlayer(this, machinePlayer, machinePlayer.getCardsPlayer(), deck);
+            threadSingUNOPlayer.start();
         }
-
     }
 
 
@@ -460,7 +458,7 @@ public class GameUnoController {
          */
         //Desactivamos de inmediato para evitar doble click
         buttonDeck.setDisable(true);
-        labelAlertMachine.setText(""); //limpio el label
+        showGameAlert("");
         /*OJO VIVO, tenemos que colocar esta condicion como que si el mazo llega a tener 5 o menos cartas
         para hacer el refill, ya que si se deja en cuando quede vacio, si la ultima carta en ser lanzada
         llega a ser un +2 o +4, te deja viendo un chispero :(
@@ -542,19 +540,12 @@ public class GameUnoController {
             unoCheckMachineStarted = false;
             machineSaidUNO = false;
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("UNO");
-            alert.setHeaderText("¡Acusación exitosa!");
-            alert.setContentText("La máquina no dijo UNO a tiempo y ha sido penalizada.");
-            alert.showAndWait();
+            showGameAlert("¡Acusación exitosa!\nLa máquina no dijo UNO a tiempo y ha sido penalizada.");
+
 
             //Caso inválido: el jugador no puede decir UNO
         } else {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("UNO");
-            alert.setHeaderText("No puedes decir UNO ahora");
-            alert.setContentText("Solo puedes decir UNO cuando te queda una sola carta, o acusar a la máquina si ella no ha dicho UNO.");
-            alert.showAndWait();
+            showGameAlert("No puedes decir UNO ahora.");
         }
     }
 
@@ -589,7 +580,7 @@ public class GameUnoController {
                     if (targetPlayer == machinePlayer) { //"si lo tiro el jugador"
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{ //"sino (si lo tiro la machine)"
-                        labelAlertMachine.setText("La maquina vuelve a tirar");
+                        showGameAlert("La maquina vuelve a tirar");
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
@@ -599,45 +590,35 @@ public class GameUnoController {
                     if (targetPlayer == machinePlayer) {
                         threadPlayMachine.setHasPlayerPlayed(false); //sigue jugando el jugador, se skipeo machin
                     }else{
-                        labelAlertMachine.setText("La maquina vuelve a tirar");
+                        showGameAlert("La maquina vuelve a tirar");
                         threadPlayMachine.setHasPlayerPlayed(true); //sigue jugando la machin, skipea player
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
                 case "WILD":
-                    /*
-                    implementacion de crear un menu interactivo para escoger el color que se escoge con la carta WILD.
-                    */
                     System.out.println("WILD USED!");
                     if (targetPlayer == machinePlayer) {
                         printCardsHumanPlayer();
-
-                        //logica para cambiar el color del juego
-                        Optional<String> result = dialog.showAndWait();
-                        result.ifPresent(color -> {
-                            System.out.println("Color seleccionado: " + color);
-                            //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
-                            card.setColor(translateColor(color));
+                        showColorChooser("Elige un color para continuar", selectedColor -> {
+                            card.setColor(translateColor(selectedColor));
+                            threadPlayMachine.setHasPlayerPlayed(true);
                         });
-                        threadPlayMachine.setHasPlayerPlayed(true); //se le da el turno a la maquina
-                    }else{
-                        Random random = new Random();
-                        int index = random.nextInt(options.size());
-                        String color = options.get(index);
+                    } else {
+                        String color = getRandomColor(options);
                         card.setColor(translateColor(color));
                         System.out.println("Color escogido: " + color);
-                        labelAlertMachine.setText("La maquina escogió el color: " + color);
+                        showGameAlert("La máquina escogió el color: " + color);
                         imageViewDeck.setOpacity(1);
                         buttonDeck.setDisable(false);
-                        threadPlayMachine.setHasPlayerPlayed(false); //se le da el turno al jugador
-                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
+                        threadPlayMachine.setHasPlayerPlayed(false);
                     }
                     break;
                 case "TWO_WILD":
                     System.out.println("TWO_WILD USED! +2");
                     if (targetPlayer == machinePlayer) { //si el jugador tiro el +2
                         Animations.animateEatCards(machinePlayer, 2, true, gameUno, this); // animación y logica
-                        labelAlertMachine.setText("La maquina comió 2 cartas");
+                        //labelAlertMachine.setText("La maquina comió 2 cartas");
+                        showGameAlert("La maquina comio 2 cartas");
                         threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
                     }else{ //si lo tiro la machin
                         Animations.animateEatCards(humanPlayer, 2, false, gameUno, this);
@@ -647,37 +628,26 @@ public class GameUnoController {
                         System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
                     }
                     break;
-                case "FOUR_WILD":
-                    System.out.println("FOUR_WILD USED! +4");
-                    if (targetPlayer == machinePlayer) { //si el jugador tiro el +4
-                        Animations.animateEatCards(machinePlayer, 4, true, gameUno, this);
-                        labelAlertMachine.setText("La maquina comió 4 cartas");
-
-                        //logica para cambiar el color del juego
-                        Optional<String> result = dialog.showAndWait();
-                        result.ifPresent(color -> {
-                            System.out.println("Color seleccionado: " + color);
-                            color = translateColor(color);
-                            //el jugador escoge un color, entonces la carda se le setea ese color para que ese sea el color valido para continuar jugando
-                            card.setColor(color);
-                        });
-
-                        threadPlayMachine.setHasPlayerPlayed(true); //el turno pasa a ser de ella
-                    }else{ //si lo tiro la machin
-                        Animations.animateEatCards(humanPlayer, 4, false, gameUno, this);
-                        Random random = new Random();
-                        int index = random.nextInt(options.size());
-                        String color = options.get(index);
-                        card.setColor(translateColor(color));
-                        System.out.println("Color escogido: " + color);
-                        labelAlertMachine.setText("La maquina escogió el color: " + color);
-                        imageViewDeck.setOpacity(1);
-                        buttonDeck.setDisable(false);
-                        threadPlayMachine.setHasPlayerPlayed(false);//el turno ahora es del player
-                        System.out.println("El turno : " + threadPlayMachine.getHasPlayerPlay());
-                    }
-                    break;
-                default:
+            case "FOUR_WILD":
+                System.out.println("FOUR_WILD USED! +4");
+                if (targetPlayer == machinePlayer) {
+                    Animations.animateEatCards(machinePlayer, 4, true, gameUno, this);
+                    showGameAlert("La máquina comió 4 cartas");
+                    showColorChooser("Elige un color para continuar", selectedColor -> {
+                        card.setColor(translateColor(selectedColor));
+                        threadPlayMachine.setHasPlayerPlayed(true);
+                    });
+                } else {
+                    Animations.animateEatCards(humanPlayer, 4, false, gameUno, this);
+                    String color = getRandomColor(options);
+                    card.setColor(translateColor(color));
+                    showGameAlert("La máquina escogió el color: " + color);
+                    imageViewDeck.setOpacity(1);
+                    buttonDeck.setDisable(false);
+                    threadPlayMachine.setHasPlayerPlayed(false);
+                }
+                break;
+            default:
                     System.out.println("Error, caso NO manejado!");
 
             }
@@ -721,4 +691,137 @@ public class GameUnoController {
     public Label getLabelAlertMachine() {
         return labelAlertMachine;
     }
+
+    public void setUnoCheckMachineStarted(boolean value) {
+        this.unoCheckMachineStarted = value;
+    }
+
+
+    public boolean isMachineSaidUNO() {
+        return machineSaidUNO;
+    }
+
+    public void setMachineSaidUNO(boolean saidUNO) {
+        this.machineSaidUNO = saidUNO;
+    }
+
+    public Deck getDeck() {
+        return this.deck;
+    }
+
+    public boolean isUnoCheckMachineStarted() {
+        return unoCheckMachineStarted;
+    }
+
+    public void showPenaltyAlert(String who, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Penalización");
+        alert.setHeaderText("¡" + who + " fue penalizado!");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    //atento a implementaciones.
+    //NUEVOS METODOS STEVEN YOEL
+
+    //agrega los mensajes a una cola para ir mostrando uno a uno y evita los alert, que sacan de pantalla completa
+    private boolean isShowingAlert = false;
+
+    public void showGameAlert(String message) {
+        Platform.runLater(() -> {
+            alertQueue.offer(message); // Agrega el mensaje a la cola
+            processNextAlert();        // Intenta mostrar el siguiente
+        });
+    }
+
+    private void processNextAlert() {
+        if (isShowingAlert || alertQueue.isEmpty()) {
+            return; // Si ya hay uno mostrándose o la cola está vacía, no hacemos nada
+        }
+
+        isShowingAlert = true;
+        String nextMessage = alertQueue.poll(); // Sacamos el siguiente mensaje
+
+        labelAlertMachine.setText(nextMessage);
+        labelAlertMachine.setVisible(true);
+
+        // Duración fija de 3 segundos
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(e -> {
+            labelAlertMachine.setText("");
+            labelAlertMachine.setVisible(false);
+            isShowingAlert = false;
+
+            // Procesa el siguiente en la cola
+            processNextAlert();
+        });
+        pause.play();
+    }
+
+    public void showColorPicker(Consumer<String> onPicked) {
+        Platform.runLater(() -> {
+            labelAlertMachine.setText("Escoge un color para continuar...");
+            this.onColorPicked = onPicked;
+            colorChooserHBox.setVisible(true);
+            colorChooserHBox.setManaged(true);
+        });
+    }
+    private void handleColorPick(String color) {
+        colorChooserHBox.setVisible(false);
+        colorChooserHBox.setManaged(false);
+        labelAlertMachine.setText("Color seleccionado: " + color);
+        if (onColorPicked != null) {
+            onColorPicked.accept(color);
+        }
+
+        // Limpiar luego de unos segundos
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+        pause.setOnFinished(e -> {
+            labelAlertMachine.setText("");
+            labelAlertMachine.setVisible(false);
+        });
+        pause.play();
+    }
+
+    //funcion auxiliar para manejo de wilds
+    private String getRandomColor(List<String> options) {
+        return options.get(new Random().nextInt(options.size()));
+    }
+
+    /**
+     * Displays a custom color chooser using the labelAlertMachine and HBox with color buttons.
+     *
+     * @param message         Message to display in labelAlertMachine.
+     * @param onColorChosen   Callback to execute when a color is selected.
+     */
+    public void showColorChooser(String message, Consumer<String> onColorChosen) {
+        Platform.runLater(() -> {
+            labelAlertMachine.setText(message);
+            labelAlertMachine.setVisible(true);
+            colorChooserHBox.setVisible(true); // Asegúrate de que el HBox está oculto por defecto en el FXML
+
+            // Habilita temporalmente todos los botones de color
+            for (Node node : colorChooserHBox.getChildren()) {
+                if (node instanceof Button) {
+                    node.setDisable(false);
+                }
+            }
+
+            // Configura una sola vez los listeners de los botones
+            Consumer<String> internalHandler = color -> {
+                labelAlertMachine.setText("");
+                labelAlertMachine.setVisible(false);
+                colorChooserHBox.setVisible(false);
+                onColorChosen.accept(color);
+            };
+
+            buttonRed.setOnAction(e -> internalHandler.accept("Rojo"));
+            buttonGreen.setOnAction(e -> internalHandler.accept("Verde"));
+            buttonBlue.setOnAction(e -> internalHandler.accept("Azul"));
+            buttonYellow.setOnAction(e -> internalHandler.accept("Amarillo"));
+        });
+    }
+
+
+
+
 }

@@ -1,8 +1,11 @@
 package org.example.eiscuno.model.deck;
 
+import org.example.eiscuno.model.card.NormalCard;
+import org.example.eiscuno.model.card.WildCard;
 import org.example.eiscuno.model.unoenum.EISCUnoEnum;
 import org.example.eiscuno.model.card.Card;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -11,7 +14,7 @@ import java.util.Stack;
 /**
  * Represents a deck of Uno cards.
  */
-public class Deck {
+public class Deck implements Serializable {
     private Stack<Card> deckOfCards;
     private Stack<Card> AuxdeckOfCards;
 
@@ -38,7 +41,19 @@ public class Deck {
                     cardEnum.name().startsWith("TWO_WILD_DRAW") ||
                     cardEnum.name().equals("FOUR_WILD_DRAW") ||
                     cardEnum.name().equals("WILD")) {
-                Card card = new Card(cardEnum.getFilePath(), getCardValue(cardEnum.name()), getCardColor(cardEnum.name()));
+                String value = getCardValue(cardEnum.name());
+                String color = getCardColor(cardEnum.name());
+                String url = cardEnum.getFilePath();
+
+                Card card;
+
+                if (value.startsWith("SKIP") || value.startsWith("WILD") || value.startsWith("TWO_WILD")
+                        || value.startsWith("FOUR_WILD") || value.startsWith("RESERVE")) {
+                    card = new WildCard(url, value, color);
+                } else {
+                    card = new NormalCard(url, value, color);
+                }
+
                 deckOfCards.push(card);
             }
         }

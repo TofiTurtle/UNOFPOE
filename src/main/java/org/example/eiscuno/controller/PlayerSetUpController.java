@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.example.eiscuno.model.saveGame.GameState;
 import org.example.eiscuno.model.saveGame.PlainTextFileHandler;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.PlayerSetUpStage;
@@ -26,8 +27,8 @@ public class PlayerSetUpController {
     //Implementacion de archivos planos:
     private PlainTextFileHandler plainTextFileHandler;
     //necesitamos este arreglo para poder pasar la imagen despues
-    private String PathListImages[] = { "/org/example/eiscuno/cards-uno/skip_blue.png", "/org/example/eiscuno/cards-uno/skip_green.png", "/org/example/eiscuno/cards-uno/skip_yellow.png",
-            "/org/example/eiscuno/cards-uno/skip_red.png"};
+    private String PathListImages[] = { "/org/example/eiscuno/images/player1.jpg", "/org/example/eiscuno/images/player2.jpg", "/org/example/eiscuno/images/player3.jpg",
+            "/org/example/eiscuno/images/player4.png"};
 
 
     @FXML //que este codigo se ejecute siempre cuando se inice
@@ -39,10 +40,10 @@ public class PlayerSetUpController {
         });
         //Lista que contiene las imagenes disponibles (falta agregarlas)
         images = List.of(
-                new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_blue.png")),
-                new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_green.png")),
-                new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_yellow.png")),
-                new Image(getClass().getResourceAsStream("/org/example/eiscuno/cards-uno/skip_red.png"))
+                new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player1.jpg")),
+                new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player2.jpg")),
+                new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player3.jpg")),
+                new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/player4.png"))
         );
         imageView.setImage(images.get(currentIndex)); //iniiclamente se pone una imagen x cualquiera
         plainTextFileHandler = new PlainTextFileHandler();
@@ -89,8 +90,10 @@ public class PlayerSetUpController {
         //Los metemos en el archivo plano -> (este almacenara el nombre y la imagen escogida por el usuario)
         String content = name + "," + currentImage;
         plainTextFileHandler.writeToFile("player_data.csv", content);
+        //Como se es una nueva partida, pero igual debemos pasar tres parametros, hacemos un objeto null
+        GameState gameState = null;
         //se los pasamos al GameUnoStage
-        GameUnoStage.getInstance(name,currentImage);
+        GameUnoStage.getInstance(name,currentImage,gameState);
         PlayerSetUpStage.deleteInstance();
     }
 
