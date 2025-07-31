@@ -17,6 +17,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.example.eiscuno.exceptions.PenaltyException;
 import org.example.eiscuno.model.card.Card;
@@ -248,47 +250,47 @@ public class GameUnoController {
 
             Card card = cards.get(i);
             ImageView cardImageView = card.getCard();
-            //SE PUEDE SEPARAR, esto es diseño de que el jugador pasa el cursor por encima de la carta y tenga un borde
-            //--------------
-            // Aplicar borde directamente al ImageView al hacer hover
+
+            // ---- NUEVO: Rectangle detrás ---- (para cumplirle la rubrica a don fabian xd)
+            Rectangle highlight = new Rectangle(70, 90);
+            highlight.setFill(null);
+            highlight.setStroke(Color.RED);
+            highlight.setStrokeWidth(15);
+            highlight.setArcWidth(10);
+            highlight.setArcHeight(10);
+            highlight.setVisible(false);
+
+            // ---- Efecto sombra extra (opcional) ----
             cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
 
+            // ---- Eventos hover: ahora activan el Rectangle también ----
             cardImageView.setOnMouseEntered(e -> {
+                highlight.setVisible(true);
                 cardImageView.setScaleX(1.05);
                 cardImageView.setScaleY(1.05);
                 cardImageView.setStyle("-fx-effect: dropshadow(gaussian, black, 10, 0.5, 0, 0);");
             });
 
             cardImageView.setOnMouseExited(e -> {
+                highlight.setVisible(false);
                 cardImageView.setScaleX(1.0);
                 cardImageView.setScaleY(1.0);
                 cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
             });
-            /*
-            * Aqui es donde Player Juega una carta
-            * */
+
+            // ---- Click (NO se toca) ----
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 labelAlertMachine.setText("");
-                if(table.isValidPlay(card) ) {
-
-                    // Usamos la clase Animations
+                if (table.isValidPlay(card)) {
                     Animations.playCardAnimation(card, cardImageView, tableImageView, () -> {
                         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                        //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
-                        deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
+                        deck.PushToAuxDeck(card);
                         System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: " + deck.getAuxDeckSize());
-                        //prueba para pillar que si guarde el serializable OJO VIVO
                         saveGame();
-                        //mini prueba para ver que si se guarde la carta actual
-                        //System.out.println("CARTA ACTUAL EN LA MESA: " + table.getCurrentCardOnTheTable());
-                        //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
                         if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
-                            unoCheckStarted = true; //Evita que se lance mas de una vez
-                            checkUNO("PLAYER"); //Simula que la maquina espera a ver si el jugador dice uno
+                            unoCheckStarted = true;
+                            checkUNO("PLAYER");
                         }
-
-                        //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
-                        //y este pueda seguir tomando cartas
                         if (card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
                             imageViewDeck.setOpacity(1);
                             buttonDeck.setDisable(false);
@@ -296,29 +298,24 @@ public class GameUnoController {
                             imageViewDeck.setOpacity(0.5);
                             buttonDeck.setDisable(true);
                         }
-
-                    /*
-                    hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
-                    setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
-                     */
-                        if (card.isSpecial()) { //si ES especial
-                            Platform.runLater(() -> handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
-                            saveGame(); //guarda partida. (tiro carta)
-                            //Ese codigo se ejecute despues de que JavaFX haya terminado de procesar eventos actuales y no crashee con la animacion
-                        } else { //si no es especial... (normal )
-                            threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
+                        if (card.isSpecial()) {
+                            Platform.runLater(() -> handleSpecialCard(card, machinePlayer));
+                            saveGame();
+                        } else {
+                            threadPlayMachine.setHasPlayerPlayed(true);
                         }
                         printCardsHumanPlayer();
-                        //esto iria con un condicional y pondriamos una alerta o algo asi
                         gameUno.isGameOver();
-
                     });
                 }
             });
-            //Contenedor para superposición, sin bloquear clicks
-            StackPane container = new StackPane(cardImageView);
-            container.setPickOnBounds(false); //<-- evita bloquear otras cartas
+
+            // ---- Contenedor: ahora contiene el highlight + imagen ----
+            StackPane container = new StackPane();
+            container.getChildren().addAll(highlight, cardImageView);
+            container.setPickOnBounds(false);
             container.setTranslateX(startOffset + i * offset);
+
             this.stackPaneCardsPlayer.getChildren().add(container);
         }
     }
