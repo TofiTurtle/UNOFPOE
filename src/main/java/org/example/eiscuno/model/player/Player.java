@@ -61,7 +61,4 @@ public class Player extends PlayerAdapter implements Serializable {
         return cardsPlayer.get(index);
     }
 
-    public String getTypePlayer() {
-        return typePlayer;
-    }
 }

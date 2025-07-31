@@ -321,11 +321,9 @@ public class GameUnoController {
                         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                         //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
                         deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
-                        System.out.println("*/*/*/*/*/*/*/*/CANTIDAD DE CARTAS EN EL MAZO AUXILIAR: " + deck.getAuxDeckSize());
                         //prueba para pillar que si guarde el serializable OJO VIVO
                         saveGame();
                         //mini prueba para ver que si se guarde la carta actual
-                        //System.out.println("CARTA ACTUAL EN LA MESA: " + table.getCurrentCardOnTheTable());
                         //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
                         if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
                             unoCheckStarted = true;
@@ -549,10 +547,6 @@ public class GameUnoController {
         }
     }
 
-    public int getPosInitCardToShow() {
-        return posInitCardToShow;
-    }
-
     //este sera el metodo encargado de manejar los diferentes casos comodin, tambien debe recibir el jugador sobre el que tendra efecto
     /*
     Este metodo es el encargado de manejar los diferentes casos comodin
@@ -668,12 +662,6 @@ public class GameUnoController {
         StartUnoView.getInstance();
     }
 
-
-    //Getter para los Players
-    public Player getMachinePlayer() {
-        return machinePlayer;
-    }
-
     public Player getHumanPlayer() {
         return humanPlayer;
     }
@@ -707,10 +695,6 @@ public class GameUnoController {
 
     public Deck getDeck() {
         return this.deck;
-    }
-
-    public boolean isUnoCheckMachineStarted() {
-        return unoCheckMachineStarted;
     }
 
     public void showPenaltyAlert(String who, String message) {
@@ -757,14 +741,6 @@ public class GameUnoController {
         pause.play();
     }
 
-    public void showColorPicker(Consumer<String> onPicked) {
-        Platform.runLater(() -> {
-            labelAlertMachine.setText("Escoge un color para continuar...");
-            this.onColorPicked = onPicked;
-            colorChooserHBox.setVisible(true);
-            colorChooserHBox.setManaged(true);
-        });
-    }
     private void handleColorPick(String color) {
         colorChooserHBox.setVisible(false);
         colorChooserHBox.setManaged(false);
