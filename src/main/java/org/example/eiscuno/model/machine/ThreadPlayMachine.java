@@ -42,7 +42,7 @@ public class ThreadPlayMachine extends Thread {
     }
 
     public void run() {
-        while (true) {
+        while (gameUnoController.gameUno.isGameOver()==0) {
             if (hasPlayerPlayed) {
                 // desactivar UI del jugador
                 Platform.runLater(() -> gameUnoController.stackPaneCardsPlayer.setDisable(true));
@@ -88,7 +88,15 @@ public class ThreadPlayMachine extends Thread {
                     deck.PushToAuxDeck(cardPlayed);
                     gameUnoController.saveGame(); //guardamos partida
                 }
-
+                if(gameUnoController.gameUno.isGameOver() ==1 || gameUnoController.gameUno.isGameOver()==2){
+                    gameUnoController.stackPaneCardsPlayer.setDisable(true);
+                    gameUnoController.deactivateEmptyDeck();
+                    if(gameUnoController.gameUno.isGameOver()==1){
+                        gameUnoController.showGameAlert("*-*-*- GANO LA MAQUINA... *-*-*-");
+                    }else{
+                        gameUnoController.showGameAlert("*-*-*- GANO EL JUGADOR, FELICIDADES! *-*-*-");
+                    }
+                }
                 // reactivar UI del jugador
                 Platform.runLater(() -> gameUnoController.stackPaneCardsPlayer.setDisable(false));
             }

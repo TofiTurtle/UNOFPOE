@@ -56,11 +56,7 @@ public class ThreadSingUNOMachine implements Runnable{
                         () -> gameUnoController.printCardsHumanPlayer()
                 );
 
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("UNO");
-                alert.setHeaderText("¡La máquina te cantó UNO!");
-                alert.setContentText("No dijiste UNO a tiempo. Has sido penalizado con una carta.");
-                alert.showAndWait();
+                gameUnoController.showGameAlert("!LA MAQUINA TE HA CANTADO UNO");
             });
         }
 

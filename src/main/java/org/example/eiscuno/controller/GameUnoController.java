@@ -273,99 +273,114 @@ public class GameUnoController {
         this.stackPaneCardsPlayer.getChildren().clear();
         List<Card> cards = this.humanPlayer.getCardsPlayer();
 
-        int offset = Math.max(20, 300 / cards.size()); //Cuanto se desplazara cada carta horizontalmente
-        int totalWidth = (cards.size() - 1) * offset;
-        int startOffset = -totalWidth / 2; // Para centrar horizontalmente
+        if(gameUno.isGameOver()==1 || gameUno.isGameOver()==2){
+            threadPlayMachine.stop();
+            stackPaneCardsPlayer.setDisable(true);
+            deactivateEmptyDeck();
 
-        for (int i = 0; i < cards.size(); i++) {
+            if(gameUno.isGameOver()==1){
+                showGameAlert("*-*-*- GANO LA MAQUINA... *-*-*-");
+            }else{
+                showGameAlert("*-*-*- GANO EL JUGADOR, FELICIDADES! *-*-*-");
 
-            Card card = cards.get(i);
-            ImageView cardImageView = card.getCard();
-            //SE PUEDE SEPARAR, esto es diseño de que el jugador pasa el cursor por encima de la carta y tenga un borde
-            //--------------
+            }
+        }else{
+            int offset = Math.max(20, 300 / cards.size()); //Cuanto se desplazara cada carta horizontalmente
+            int totalWidth = (cards.size() - 1) * offset;
+            int startOffset = -totalWidth / 2; // Para centrar horizontalmente
 
-            // ---- NUEVO: Rectangle detrás ---- (para cumplirle la rubrica a don fabian xd)
-            Rectangle highlight = new Rectangle(70, 90);
-            highlight.setFill(null);
-            highlight.setStroke(Color.RED);
-            highlight.setStrokeWidth(15);
-            highlight.setArcWidth(10);
-            highlight.setArcHeight(10);
-            highlight.setVisible(false);
+            for (int i = 0; i < cards.size(); i++) {
 
-            // Aplicar borde directamente al ImageView al hacer hover
-            cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
+                Card card = cards.get(i);
+                ImageView cardImageView = card.getCard();
+                //SE PUEDE SEPARAR, esto es diseño de que el jugador pasa el cursor por encima de la carta y tenga un borde
+                //--------------
 
-            cardImageView.setOnMouseEntered(e -> {
-                highlight.setVisible(true);
-                cardImageView.setScaleX(1.05);
-                cardImageView.setScaleY(1.05);
-                cardImageView.setStyle("-fx-effect: dropshadow(gaussian, black, 10, 0.5, 0, 0);");
-            });
-
-            cardImageView.setOnMouseExited(e -> {
+                // ---- NUEVO: Rectangle detrás ---- (para cumplirle la rubrica a don fabian xd)
+                Rectangle highlight = new Rectangle(70, 90);
+                highlight.setFill(null);
+                highlight.setStroke(Color.RED);
+                highlight.setStrokeWidth(15);
+                highlight.setArcWidth(10);
+                highlight.setArcHeight(10);
                 highlight.setVisible(false);
-                cardImageView.setScaleX(1.0);
-                cardImageView.setScaleY(1.0);
+
+                // Aplicar borde directamente al ImageView al hacer hover
                 cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
-            });
-            /*
-            * Aqui es donde Player Juega una carta
-            * */
-            cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                showGameAlert("");
-                if(table.isValidPlay(card) ) {
 
-                    // Usamos la clase Animations
-                    Animations.playCardAnimation(card, cardImageView, tableImageView, () -> {
-                        humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                        //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
-                        deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
-                        //prueba para pillar que si guarde el serializable OJO VIVO
-                        saveGame();
-                        //mini prueba para ver que si se guarde la carta actual
-                        //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
-                        if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
-                            unoCheckStarted = true;
-                            playerSaidUNO = false; // ← importante reiniciar bandera
-                        }
+                cardImageView.setOnMouseEntered(e -> {
+                    highlight.setVisible(true);
+                    cardImageView.setScaleX(1.05);
+                    cardImageView.setScaleY(1.05);
+                    cardImageView.setStyle("-fx-effect: dropshadow(gaussian, black, 10, 0.5, 0, 0);");
+                });
+
+                cardImageView.setOnMouseExited(e -> {
+                    highlight.setVisible(false);
+                    cardImageView.setScaleX(1.0);
+                    cardImageView.setScaleY(1.0);
+                    cardImageView.setStyle("-fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);");
+                });
+                /*
+                 * Aqui es donde Player Juega una carta
+                 * */
+                cardImageView.setOnMouseClicked((MouseEvent event) -> {
+                    showGameAlert("");
+                    if(table.isValidPlay(card) ) {
+
+                        // Usamos la clase Animations
+                        Animations.playCardAnimation(card, cardImageView, tableImageView, () -> {
+                            humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                            //si llega aqui, es que se PUSO una carta entonces -> guardammos en AUX
+                            deck.PushToAuxDeck(card); //ya la puso, ya no la tiene ni el humano, ni el deck, pasemoloslo al aux
+                            //prueba para pillar que si guarde el serializable OJO VIVO
+                            saveGame();
+                            //mini prueba para ver que si se guarde la carta actual
+                            //Si al jugador le queda EXACTAMENTE una carta, empieza la vigilancia del uno
+                            if (humanPlayer.getCardsPlayer().size() == 1 && !unoCheckStarted) {
+                                unoCheckStarted = true;
+                                playerSaidUNO = false; // ← importante reiniciar bandera
+                            }
 
 
-                        //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
-                        //y este pueda seguir tomando cartas
-                        if (card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
-                            imageViewDeck.setOpacity(1);
-                            buttonDeck.setDisable(false);
-                        } else {
-                            imageViewDeck.setOpacity(0.5);
-                            buttonDeck.setDisable(true);
-                        }
+                            //Condicional para que si el jugador usa el reserve o el skip, no se le deshabilite el deck
+                            //y este pueda seguir tomando cartas
+                            if (card.getValue().equals("SKIP") || card.getValue().equals("RESERVE")) {
+                                imageViewDeck.setOpacity(1);
+                                buttonDeck.setDisable(false);
+                            } else {
+                                imageViewDeck.setOpacity(0.5);
+                                buttonDeck.setDisable(true);
+                            }
 
                     /*
                     hacemos la verificacion de si la carta jugada es un comodin, lo hacemos antes de usar el metodo
                     setHasPlayerPlayed para que la maquina no pueda jugar aun, mientras hacemos las validaciones y demas
                      */
-                        if (card.isSpecial()) { //si ES especial
-                            Platform.runLater(() -> handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
-                            saveGame(); //guarda partida. (tiro carta)
-                            //Ese codigo se ejecute despues de que JavaFX haya terminado de procesar eventos actuales y no crashee con la animacion
-                        } else { //si no es especial... (normal )
-                            threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
-                        }
-                        printCardsHumanPlayer();
-                        //esto iria con un condicional y pondriamos una alerta o algo asi
-                        gameUno.isGameOver();
+                            if (card.isSpecial()) { //si ES especial
+                                Platform.runLater(() -> handleSpecialCard(card, machinePlayer)); //dependiendo del caso, aplique efecto, Platform para que
+                                saveGame(); //guarda partida. (tiro carta)
+                                //Ese codigo se ejecute despues de que JavaFX haya terminado de procesar eventos actuales y no crashee con la animacion
+                            } else { //si no es especial... (normal )
+                                threadPlayMachine.setHasPlayerPlayed(true); //dele turno a la machin
+                            }
+                            printCardsHumanPlayer();
 
-                    });
-                }
-            });
-            //Contenedor para superposición, sin bloquear clicks
-            StackPane container = new StackPane();
-            container.getChildren().addAll(highlight, cardImageView);
-            container.setPickOnBounds(false); //<-- evita bloquear otras cartas
-            container.setTranslateX(startOffset + i * offset);
-            this.stackPaneCardsPlayer.getChildren().add(container);
-        }
+
+
+                        });
+                    }
+                });
+                //Contenedor para superposición, sin bloquear clicks
+                StackPane container = new StackPane();
+                container.getChildren().addAll(highlight, cardImageView);
+                container.setPickOnBounds(false); //<-- evita bloquear otras cartas
+                container.setTranslateX(startOffset + i * offset);
+                this.stackPaneCardsPlayer.getChildren().add(container);
+            }
+        };
+
+
     }
 
 

@@ -111,16 +111,16 @@ public class GameUno implements IGameUno {
      * @return True if the deck is empty, indicating the game is over; otherwise, false.
      */
     @Override
-    public Boolean isGameOver() {
+    public int isGameOver() {
         if(machinePlayer.getCardsPlayer().isEmpty()) {
             System.out.println("Gano la maquina");
-            return true;
+            return 1;
         }
         else if(humanPlayer.getCardsPlayer().isEmpty()) {
             System.out.println("Gano el humano");
-            return true;
+            return 2;
         }
-        return false;
+        return 0;
     }
 
 
