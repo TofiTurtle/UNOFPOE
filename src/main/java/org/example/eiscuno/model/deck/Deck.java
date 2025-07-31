@@ -28,7 +28,7 @@ public class Deck implements Serializable {
     /**
      * Initializes the deck with cards based on the EISCUnoEnum values.
      */
-    private void initializeDeck() {
+    public void initializeDeck() {
         for (EISCUnoEnum cardEnum : EISCUnoEnum.values()) {
             if (cardEnum.name().startsWith("GREEN_") ||
                     cardEnum.name().startsWith("YELLOW_") ||
